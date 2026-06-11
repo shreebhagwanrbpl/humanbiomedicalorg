@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: linear-gradient(to bottom right,
+      #eff6ff,
+      #dbeafe,
+      #e0f2fe,
+      #f8fafc);
+
+  color: #111827;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.gradient {
+  background: linear-gradient(to right, #06b6d4, #8b5cf6);
+}
+
+.card {
+  @apply bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10;
+}
