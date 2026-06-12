@@ -12,6 +12,7 @@ import { doc, getDoc } from "firebase/firestore";
 export default function Footer({
   city = "",
 }) {
+
   const [contactInfo, setContactInfo] =
     useState([]);
 
