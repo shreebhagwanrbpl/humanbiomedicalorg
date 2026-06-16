@@ -8,7 +8,7 @@ import {
 
 export default async function sitemap() {
     const baseUrl =
-        "https://humanbiomedical.com";
+        "https://humanbiomedical.org";
 
     const urls = [];
 
