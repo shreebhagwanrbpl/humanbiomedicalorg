@@ -104,18 +104,14 @@ export async function generateMetadata({
                 title,
                 description,
                 url,
-                siteName:
-                    "Human Biomedical",
+                siteName: "Human Biomedical",
                 locale: "en_IN",
-                type: "product",
                 images: [
                     {
-                        url:
-                            product.image,
+                        url: product.image,
                         width: 1200,
                         height: 630,
-                        alt:
-                            product.title,
+                        alt: product.title,
                     },
                 ],
             },
