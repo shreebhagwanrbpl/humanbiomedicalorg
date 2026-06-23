@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "rajbiosis-central"
-  }
+  },
+  "targets": {
+    "rajbiosis-central": {
+      "hosting": {
+        "human": [
+          "humanbiomedicalorg"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

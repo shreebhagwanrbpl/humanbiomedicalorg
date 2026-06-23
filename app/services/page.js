@@ -55,7 +55,7 @@ export default function Services({
             "@context": "https://schema.org",
             "@type": "MedicalBusiness",
             name: "Human Biomedical",
-            url: "https://humanbiomedical.com/services",
+            url: "https://humanbiomedical.org/services",
           }),
         }}
       />

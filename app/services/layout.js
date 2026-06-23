@@ -7,7 +7,7 @@ export const metadata = {
 
     alternates: {
         canonical:
-            "https://humanbiomedical.com/services",
+            "https://humanbiomedical.org/services",
     },
 };
 

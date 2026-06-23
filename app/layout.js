@@ -2,43 +2,83 @@ import "./globals.css";
 
 export const metadata = {
   metadataBase: new URL(
-    "https://humanbiomedical.com"
+    "https://humanbiomedical.org"
   ),
 
-  title: {
-    default: "Human Biomedical",
-    template: "%s | Human Biomedical",
-  },
+  title:
+    "Biomedical Equipment Supplier in India | Human Biomedical",
 
   description:
-    "Advanced Biomedical Equipment & Healthcare Solutions",
+    "Human Biomedical supplies CBC Machines, Hematology Analyzers, Biochemistry Analyzers, ELISA Readers, Diagnostic Equipment and Laboratory Instruments across India.",
 
   keywords: [
-    "Biomedical Equipment",
-    "Medical Analyzer",
-    "Diagnostic Equipment",
-    "Laboratory Equipment",
-    "Healthcare Solutions",
+    "Biomedical Equipment Supplier",
+    "Laboratory Equipment Supplier",
+    "CBC Machine Supplier",
+    "Hematology Analyzer Supplier",
+    "Biochemistry Analyzer Supplier",
+    "ELISA Reader Supplier",
+    "Diagnostic Equipment Supplier",
+    "Medical Equipment Supplier India",
+    "Laboratory Instruments",
+    "Human Biomedical",
   ],
+
+  openGraph: {
+    title: {
+      default:
+        "Biomedical Equipment Supplier in India | Human Biomedical",
+      template:
+        "%s | Human Biomedical",
+    },
+
+    description:
+      "Supplier of biomedical and laboratory equipment across India.",
+
+    url: "https://humanbiomedical.org",
+
+    siteName: "Human Biomedical",
+
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Human Biomedical",
+      },
+    ],
+
+    locale: "en_IN",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+
+    title:
+      "Biomedical Equipment Supplier in India | Human Biomedical",
+
+    description:
+      "Supplier of biomedical and laboratory equipment across India.",
+
+    images: ["/logo.png"],
+  },
 
   alternates: {
     canonical:
-      "https://humanbiomedical.com",
-  },
-
-  openGraph: {
-    title: "Human Biomedical",
-    description:
-      "Advanced Biomedical Equipment & Healthcare Solutions",
-    url: "https://humanbiomedical.com",
-    siteName: "Human Biomedical",
-    locale: "en_US",
-    type: "website",
+      "https://humanbiomedical.org",
   },
 
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -47,7 +87,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+      </body>
     </html>
   );
 }

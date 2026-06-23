@@ -9,7 +9,7 @@ export const metadata = {
     "Human Biomedical provides advanced biomedical analyzers, pathology laboratory systems, healthcare automation, and modern medical technology solutions.",
 
   alternates: {
-    canonical: "https://humanbiomedical.com/about",
+    canonical: "https://humanbiomedical.org/about",
   },
 };
 
@@ -44,7 +44,7 @@ export default function About({
             "@context": "https://schema.org",
             "@type": "MedicalOrganization",
             name: "Human Biomedical",
-            url: "https://humanbiomedical.com",
+            url: "https://humanbiomedical.org",
           }),
         }}
       />

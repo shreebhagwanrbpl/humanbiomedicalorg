@@ -35,32 +35,74 @@ export async function generateMetadata({
         }
 
         return {
-            title: `${product.title}`,
+            title: `${product.title} Supplier in India | Human Biomedical`,
 
             description:
                 product.description?.slice(
                     0,
                     160
                 ) ||
-                "Biomedical equipment and healthcare solutions.",
+                `Buy ${product.title} from Human Biomedical. Trusted supplier of biomedical and laboratory equipment across India.`,
+
+            keywords: [
+                product.title,
+                `${product.title} Supplier`,
+                `${product.title} Dealer`,
+                `${product.title} Price`,
+                "Biomedical Equipment",
+                "Laboratory Equipment",
+                "Medical Equipment",
+                "Human Biomedical",
+            ],
 
             alternates: {
                 canonical:
-                    `https://humanbiomedical.com/items/${slug}`,
+                    `https://humanbiomedical.org/items/${slug}`,
             },
 
             openGraph: {
-                title: product.title,
+                title:
+                    `${product.title} Supplier in India | Human Biomedical`,
+                description:
+                    product.description?.slice(
+                        0,
+                        160
+                    ),
+                url:
+                    `https://humanbiomedical.org/items/${slug}`,
+                siteName:
+                    "Human Biomedical",
+                type: "website",
+                images: [
+                    {
+                        url:
+                            product.image,
+                        width: 1200,
+                        height: 630,
+                        alt:
+                            product.title,
+                    },
+                ],
+            },
+
+            twitter: {
+                card:
+                    "summary_large_image",
+                title:
+                    `${product.title} Supplier in India | Human Biomedical`,
                 description:
                     product.description?.slice(
                         0,
                         160
                     ),
                 images: [
-                    {
-                        url: product.image,
-                    },
+                    product.image,
                 ],
+            },
+
+            robots: {
+                index: true,
+                follow: true,
             },
         };
     } catch {

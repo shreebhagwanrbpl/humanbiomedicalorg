@@ -20,7 +20,7 @@ export const metadata = {
   ],
 
   alternates: {
-    canonical: "https://humanbiomedical.com",
+    canonical: "https://humanbiomedical.org",
   },
 };
 
@@ -47,7 +47,7 @@ export default function Home({ city = "" }) {
             "@context": "https://schema.org",
             "@type": "MedicalOrganization",
             name: "Human Biomedical",
-            url: "https://humanbiomedical.com",
+            url: "https://humanbiomedical.org",
           }),
         }}
       />

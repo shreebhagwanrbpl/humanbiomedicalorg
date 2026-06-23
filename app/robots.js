@@ -6,6 +6,6 @@ export default function robots() {
         },
 
         sitemap:
-            "https://humanbiomedical.com/sitemap.xml",
+            "https://humanbiomedical.org/sitemap.xml",
     };
 }

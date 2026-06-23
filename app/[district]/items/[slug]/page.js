@@ -40,7 +40,7 @@ export async function generateMetadata({
         }
 
         const title =
-            `${product.title} in ${city} | Human Biomedical`;
+            `${product.title} Supplier in ${city} | Human Biomedical`;
 
         const description =
             `Buy ${product.title} in ${city}. Best price, installation, support and biomedical equipment supplier in ${city}. Contact Human Biomedical for ${product.title} and healthcare solutions.`;
@@ -63,7 +63,7 @@ export async function generateMetadata({
         ];
 
         const url =
-            `https://humanbiomedical.com/${district}/items/${slug}`;
+            `https://humanbiomedical.org/${district}/items/${slug}`;
 
         return {
             title,
@@ -107,7 +107,7 @@ export async function generateMetadata({
                 siteName:
                     "Human Biomedical",
                 locale: "en_IN",
-                type: "website",
+                type: "product",
                 images: [
                     {
                         url:
@@ -190,14 +190,14 @@ export async function generateMetadata({
 
 //             alternates: {
 //                 canonical:
-//                     `https://humanbiomedical.com/${district}/items/${slug}`,
+//                     `https://humanbiomedical.org/${district}/items/${slug}`,
 //             },
 
 //             openGraph: {
 //                 title: `${product.title} in ${city}`,
 //                 description,
 //                 url:
-//                     `https://humanbiomedical.com/${district}/items/${slug}`,
+//                     `https://humanbiomedical.org/${district}/items/${slug}`,
 //                 type: "website",
 //                 images: [
 //                     {
@@ -260,33 +260,25 @@ export default async function Page({
                 item.slug === slug
         );
 
-    const schema =
-        product && {
-            "@context":
-                "https://schema.org",
-            "@type":
-                "Product",
-            name:
-                product.title,
-            image:
-                product.image,
-            description:
-                product.description,
-            brand: {
-                "@type":
-                    "Brand",
-                name:
-                    "Human Biomedical",
-            },
-            offers: {
-                "@type":
-                    "Offer",
-                availability:
-                    "https://schema.org/InStock",
-                priceCurrency:
-                    "INR",
-            },
-        };
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.title,
+        image: product.image,
+        description: product.description,
+        sku: slug,
+        url: `https://humanbiomedical.org/${district}/items/${slug}`,
+        brand: {
+            "@type": "Brand",
+            name: "Human Biomedical",
+        },
+        offers: {
+            "@type": "Offer",
+            availability:
+                "https://schema.org/InStock",
+            priceCurrency: "INR",
+        },
+    };
 
     return (
         <>
