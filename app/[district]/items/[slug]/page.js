@@ -1,6 +1,8 @@
 import ProductDetails from "@/app/items/[slug]/ProductDetails";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 export async function generateMetadata({
     params,
 }) {
@@ -27,11 +29,15 @@ export async function generateMetadata({
         const products =
             snap.data()?.products || [];
 
-        const product =
-            products.find(
-                (item) =>
-                    item.slug === slug
-            );
+        const product = products.find((item) => {
+            const generatedSlug =
+                item.title
+                    ?.toLowerCase()
+                    .replace(/\s+/g, "-")
+                    .replace(/[^\w-]+/g, "");
+
+            return generatedSlug === slug;
+        });
 
         if (!product) {
             return {
@@ -108,7 +114,10 @@ export async function generateMetadata({
                 locale: "en_IN",
                 images: [
                     {
-                        url: product.image,
+                        url:
+                            product.image ||
+                            product.images?.[0] ||
+                            "/humanlogo.png",
                         width: 1200,
                         height: 630,
                         alt: product.title,
@@ -122,7 +131,9 @@ export async function generateMetadata({
                 title,
                 description,
                 images: [
-                    product.image,
+                    product.image ||
+                    product.images?.[0] ||
+                    "/humanlogo.png",
                 ],
             },
         };
@@ -250,32 +261,50 @@ export default async function Page({
     const products =
         snap.data()?.products || [];
 
-    const product =
-        products.find(
-            (item) =>
-                item.slug === slug
-        );
+    const product = products.find((item) => {
+        const generatedSlug =
+            item.title
+                ?.toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^\w-]+/g, "");
 
-    const schema = {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: product.title,
-        image: product.image,
-        description: product.description,
-        sku: slug,
-        url: `https://humanbiomedical.org/${district}/items/${slug}`,
-        brand: {
-            "@type": "Brand",
-            name: "Human Biomedical",
-        },
-        offers: {
-            "@type": "Offer",
-            availability:
-                "https://schema.org/InStock",
-            priceCurrency: "INR",
-        },
-    };
+        return generatedSlug === slug;
+    });
 
+    const schema = product
+        ? {
+            "@context": "https://schema.org",
+            "@type": "Product",
+
+            name: product.title || "",
+
+            image:
+                product.image ||
+                product.images?.[0] ||
+                "",
+
+            description:
+                product.description ||
+                product.desc ||
+                "",
+
+            sku: slug,
+
+            url: `https://humanbiomedical.org/${district}/items/${slug}`,
+
+            brand: {
+                "@type": "Brand",
+                name: "Human Biomedical",
+            },
+
+            offers: {
+                "@type": "Offer",
+                availability:
+                    "https://schema.org/InStock",
+                priceCurrency: "INR",
+            },
+        }
+        : null;
     return (
         <>
             {schema && (
@@ -290,10 +319,12 @@ export default async function Page({
                 />
             )}
 
+            <Navbar city={city} />
             <ProductDetails
                 slug={slug}
                 city={city}
             />
+            <Footer city={city} />
         </>
     );
 }

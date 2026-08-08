@@ -1,127 +1,87 @@
 import ProductDetails from "./ProductDetails";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 
-export async function generateMetadata({
-    params,
-}) {
+export async function generateMetadata({ params }) {
     const { slug } = await params;
 
-    try {
-        const snap = await getDoc(
-            doc(
-                db,
-                "websites",
-                "humanbiomedicalorg",
-                "pages",
-                "products"
-            )
-        );
+    const productName = slug
+        ?.replace(/-/g, " ")
+        ?.replace(/\b\w/g, (c) => c.toUpperCase());
 
-        const products =
-            snap.data()?.products || [];
+    const title = `${productName} Supplier in India | Price, Dealer & Distributor | Human Biomedicals`;
 
-        const product =
-            products.find(
-                (item) =>
-                    item.slug === slug
-            );
+    const description = `Buy ${productName} at best price in India. Trusted supplier, dealer and distributor of ${productName} for hospitals, laboratories, diagnostic centers, research institutes and healthcare facilities. Contact Human Biomedicals for latest quotation and product details.`;
 
-        if (!product) {
-            return {
-                title:
-                    "Human Biomedical",
-            };
-        }
+    const url = `https://humanbiomedical.in/items/${slug}`;
 
-        return {
-            title: `${product.title} Supplier in India | Human Biomedical`,
+    return {
+        title,
+        description,
 
-            description:
-                product.description?.slice(
-                    0,
-                    160
-                ) ||
-                `Buy ${product.title} from Human Biomedical. Trusted supplier of biomedical and laboratory equipment across India.`,
+        keywords: [
+            productName,
+            `${productName} Supplier`,
+            `${productName} Dealer`,
+            `${productName} Distributor`,
+            `${productName} Manufacturer`,
+            `${productName} Exporter`,
+            `${productName} Price`,
+            `${productName} Price in India`,
+            `${productName} Supplier in India`,
+            `${productName} Dealer in India`,
+            `${productName} Distributor in India`,
+            `Buy ${productName}`,
+            `${productName} for Laboratory`,
+            `${productName} for Hospital`,
+            `${productName} for Diagnostic Center`,
+            "Biomedical Equipment",
+            "Medical Equipment",
+            "Laboratory Equipment",
+            "Diagnostic Equipment",
+            "Hospital Equipment",
+            "Healthcare Equipment",
+            "Human Biomedicals",
+        ],
 
-            keywords: [
-                product.title,
-                `${product.title} Supplier`,
-                `${product.title} Dealer`,
-                `${product.title} Price`,
-                "Biomedical Equipment",
-                "Laboratory Equipment",
-                "Medical Equipment",
-                "Human Biomedical",
-            ],
+        alternates: {
+            canonical: url,
+        },
 
-            alternates: {
-                canonical:
-                    `https://humanbiomedical.org/items/${slug}`,
-            },
+        openGraph: {
+            title,
+            description,
+            url,
+            siteName: "Human Biomedicals",
+            type: "website",
+            locale: "en_IN",
+        },
 
-            openGraph: {
-                title:
-                    `${product.title} Supplier in India | Human Biomedical`,
-                description:
-                    product.description?.slice(
-                        0,
-                        160
-                    ),
-                url:
-                    `https://humanbiomedical.org/items/${slug}`,
-                siteName:
-                    "Human Biomedical",
-                type: "website",
-                images: [
-                    {
-                        url:
-                            product.image,
-                        width: 1200,
-                        height: 630,
-                        alt:
-                            product.title,
-                    },
-                ],
-            },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+        },
 
-            twitter: {
-                card:
-                    "summary_large_image",
-                title:
-                    `${product.title} Supplier in India | Human Biomedical`,
-                description:
-                    product.description?.slice(
-                        0,
-                        160
-                    ),
-                images: [
-                    product.image,
-                ],
-            },
-
-            robots: {
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
                 index: true,
                 follow: true,
+                "max-video-preview": -1,
+                "max-image-preview": "large",
+                "max-snippet": -1,
             },
-        };
-    } catch {
-        return {
-            title:
-                "Human Biomedical",
-        };
-    }
+        },
+
+        metadataBase: new URL("https://humanbiomedical.in"),
+    };
 }
 
-export default async function Page({
-    params,
-}) {
-    const { slug } =
-        await params;
+export default async function Page({ params }) {
+    const { slug } = await params;
+    const allProducts = await fetchFullCatalog();
+    const product = allProducts.find((p) => p.slug === slug) || null;
 
-    return (
-        <ProductDetails
-            slug={slug}
-        />
-    );
+    return <ProductDetails slug={slug} product={product} />;
 }
