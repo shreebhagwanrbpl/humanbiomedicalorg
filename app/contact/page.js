@@ -324,7 +324,7 @@ export default function Contact({
                           <p className="mt-2 text-blue-100 text-sm sm:text-base">
                             {city
                               ? `${city}, ${stateName}, India`
-                              : getValue("Office")}
+                              : getValue("Address")}
                           </p>
 
                         </div>

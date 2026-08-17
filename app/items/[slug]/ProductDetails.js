@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { fetchFullCatalog } from "@/lib/data-fetcher";
+import ProductBrochureButton from "@/components/ProductBrochureButton"
 
 export default function ProductDetails({ slug, product: initialProduct }) {
     const [product, setProduct] = useState(initialProduct || null);
@@ -497,7 +498,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                         </div>
 
                         <div className="product-info-card">
-
+<ProductBrochureButton product={product} />
                             <p>
                                 <b>Brand:</b>
                                 {product.brand || "N/A"}

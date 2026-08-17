@@ -242,7 +242,7 @@ export default function Footer({
                     📍{" "}
                     {city
                       ? `${city}, ${stateName}, India`
-                      : getValue("Office")}
+                      : getValue("Address")}
                   </p>
 
                   <p>
@@ -259,26 +259,26 @@ export default function Footer({
 
             <div className="flex gap-4 mt-5">
 
-              <a
+              {/* <a
                 href="#"
                 className="w-11 h-11 rounded-xl bg-white shadow-md border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition duration-300"
               >
                 <FaFacebookF size={18} />
-              </a>
+              </a> */}
 
               <a
-                href="#"
+                href="https://www.instagram.com/humanbiomedicals/"
                 className="w-11 h-11 rounded-xl bg-white shadow-md border border-pink-100 flex items-center justify-center text-pink-500 hover:bg-pink-500 hover:text-white transition duration-300"
               >
                 <FaInstagram size={18} />
               </a>
-
+{/* 
               <a
                 href="#"
                 className="w-11 h-11 rounded-xl bg-white shadow-md border border-cyan-100 flex items-center justify-center text-cyan-600 hover:bg-cyan-600 hover:text-white transition duration-300"
               >
                 <FaLinkedinIn size={18} />
-              </a>
+              </a> */}
 
             </div>
 
