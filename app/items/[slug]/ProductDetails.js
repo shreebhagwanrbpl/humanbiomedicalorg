@@ -498,7 +498,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                         </div>
 
                         <div className="product-info-card">
-<ProductBrochureButton product={product} />
+                            <ProductBrochureButton product={product} />
                             <p>
                                 <b>Brand:</b>
                                 {product.brand || "N/A"}
