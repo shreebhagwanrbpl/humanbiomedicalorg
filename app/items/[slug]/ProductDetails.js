@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
-import "./page.css"
+import "./page.css";
 import { usePathname } from "next/navigation";
 
 import {
@@ -20,9 +20,9 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { fetchFullCatalog } from "@/lib/data-fetcher";
-import ProductBrochureButton from "@/components/ProductBrochureButton"
+import ProductBrochureButton from "@/components/ProductBrochureButton";
 
-export default function ProductDetails({ slug, product: initialProduct }) {
+export default function ProductDetails({ slug, product: initialProduct, city: propCity = null }) {
     const [product, setProduct] = useState(initialProduct || null);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [selectedImage, setSelectedImage] = useState(() => {
@@ -46,7 +46,8 @@ export default function ProductDetails({ slug, product: initialProduct }) {
     const pathname = usePathname();
 
     const pathParts = pathname.split("/").filter(Boolean);
-    const city = pathParts.length > 1 ? pathParts[0] : "India";
+    const cityFromPath = pathParts.length > 1 ? pathParts[0] : "India";
+    const city = propCity || cityFromPath;
     const cityName = city.charAt(0).toUpperCase() + city.slice(1);
 
     useEffect(() => {
@@ -109,15 +110,15 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                 collection(
                     db,
                     "websitesQueries",
-                    "centralbiomedicals",
+                    "humanbiomedicalorg",
                     "productQueries"
                 ),
                 {
                     ...form,
-                    productName: product.title,
-                    productSlug: product.slug,
-                    brand: product.brand || "",
-                    model: product.model || "",
+                    productName: product?.title || "",
+                    productSlug: product?.slug || slug,
+                    brand: product?.brand || "",
+                    model: product?.model || "",
                     createdAt: new Date(),
                 }
             );
@@ -149,7 +150,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                 product.title,
             brand: {
                 "@type": "Brand",
-                name: product.brand || "Central Biomedicals",
+                name: product.brand || "Human Biomedical",
             },
         }
         : null;
@@ -236,7 +237,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
 
     if (loading) {
         return (
-            <section className="py-10 md:py-20 bg-red-500">
+            <section className="py-10 md:py-20 bg-slate-50">
                 <div className="container-custom">
                     <div className="grid lg:grid-cols-2 gap-12 animate-pulse">
                         <div className="h-[420px] md:h-[520px] rounded-[36px] bg-slate-200" />
@@ -268,7 +269,6 @@ export default function ProductDetails({ slug, product: initialProduct }) {
 
     return (
         <section className="product-page">
-
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -284,30 +284,19 @@ export default function ProductDetails({ slug, product: initialProduct }) {
             />
 
             <div className="container-custom">
-
                 <div className="product-breadcrumb">
-
                     <span>Home</span>
-
                     <span>/</span>
-
                     <span>Products</span>
-
                     <span>/</span>
-
                     <strong>{product.title}</strong>
-
                 </div>
 
                 <div className="product-main">
-
-                    {/* Product Image */}
+                    {/* Product Image Gallery & Media */}
                     <div className="product-gallery">
-
                         <div className="product-image-box">
-
                             {selectedMedia === "video" && product.video ? (
-
                                 <video
                                     controls
                                     autoPlay
@@ -318,9 +307,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                         type="video/mp4"
                                     />
                                 </video>
-
                             ) : (
-
                                 <>
                                     {!imageLoaded && (
                                         <div className="product-image-loader" />
@@ -345,18 +332,14 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                         }}
                                     />
                                 </>
-
                             )}
-
                         </div>
 
                         <div className="product-thumbnails">
-
                             {(product.images?.length
                                 ? product.images
                                 : [product.image || "/placeholder.jpg"]
                             ).map((img, index) => (
-
                                 <button
                                     key={index}
                                     onClick={() => {
@@ -369,7 +352,6 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                         : ""
                                         }`}
                                 >
-
                                     <img
                                         src={img}
                                         alt=""
@@ -380,13 +362,10 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                                 "/placeholder.jpg";
                                         }}
                                     />
-
                                 </button>
-
                             ))}
 
                             {product.video && (
-
                                 <button
                                     onClick={() =>
                                         setSelectedMedia("video")
@@ -396,47 +375,28 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                         : ""
                                         }`}
                                 >
-
                                     <FaPlay />
-
-                                    <span>
-                                        Video
-                                    </span>
-
+                                    <span>Video</span>
                                 </button>
-
                             )}
 
                             {product.pdf && (
-
                                 <a
                                     href={product.pdf}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="media-thumb"
                                 >
-
-                                    <span className="pdf-icon">
-                                        📄
-                                    </span>
-
-                                    <span>
-                                        PDF
-                                    </span>
-
+                                    <span className="pdf-icon">📄</span>
+                                    <span>PDF</span>
                                 </a>
-
                             )}
-
                         </div>
-
                     </div>
 
-                    {/* Product Details */}
+                    {/* Product Header & Info Card */}
                     <div className="product-details">
-
                         <div className="product-header">
-
                             <h1 className="product-title">
                                 {product.title}
                             </h1>
@@ -445,7 +405,6 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                 ref={shareRef}
                                 className="share-wrapper"
                             >
-
                                 <button
                                     onClick={handleNativeShare}
                                     className="share-btn"
@@ -454,9 +413,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                 </button>
 
                                 {showShare && (
-
                                     <div className="share-popup">
-
                                         <button
                                             onClick={handleCopy}
                                             className="share-item"
@@ -488,90 +445,113 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                             <FaInstagram className="instagram-icon" />
                                             Instagram
                                         </button>
-
                                     </div>
-
                                 )}
-
                             </div>
-
                         </div>
 
+                        {/* Quick Spec Card with all category product fields */}
                         <div className="product-info-card">
                             <ProductBrochureButton product={product} />
-                            <p>
-                                <b>Brand:</b>
-                                {product.brand || "N/A"}
-                            </p>
 
-                            <p>
-                                <b>Model:</b>
-                                {product.model || "N/A"}
-                            </p>
+                            {product.brand && (
+                                <p>
+                                    <b>Brand:</b>
+                                    {product.brand}
+                                </p>
+                            )}
 
-                            <p>
-                                <b>Instrument:</b>
-                                {product.instrument || "N/A"}
-                            </p>
+                            {product.model && (
+                                <p>
+                                    <b>Model:</b>
+                                    {product.model}
+                                </p>
+                            )}
 
-                            <p>
-                                <b>Capacity:</b>
-                                {product.capacity || "N/A"}
-                            </p>
+                            {product.price && (
+                                <p>
+                                    <b>Price:</b>
+                                    {product.price}
+                                </p>
+                            )}
 
-                            <p>
-                                <b>Throughput:</b>
-                                {product.throughput || "N/A"}
-                            </p>
+                            {product.instrument && (
+                                <p>
+                                    <b>Instrument:</b>
+                                    {product.instrument}
+                                </p>
+                            )}
 
-                            <p>
-                                <b>Usage:</b>
-                                {product.usage || "N/A"}
-                            </p>
+                            {product.capacity && (
+                                <p>
+                                    <b>Capacity:</b>
+                                    {product.capacity}
+                                </p>
+                            )}
 
-                            <p>
-                                <b>Automation:</b>
-                                {product.automation || "N/A"}
-                            </p>
+                            {product.throughput && (
+                                <p>
+                                    <b>Throughput:</b>
+                                    {product.throughput}
+                                </p>
+                            )}
 
-                            <p>
-                                <b>Availability:</b>
-                                {product.availability || "N/A"}
-                            </p>
+                            {product.usage && (
+                                <p>
+                                    <b>Usage:</b>
+                                    {product.usage}
+                                </p>
+                            )}
 
+                            {product.automation && (
+                                <p>
+                                    <b>Automation:</b>
+                                    {product.automation}
+                                </p>
+                            )}
+
+                            {product.parameters && (
+                                <p>
+                                    <b>Parameters:</b>
+                                    {product.parameters}
+                                </p>
+                            )}
+
+                            {product.size && (
+                                <p>
+                                    <b>Size:</b>
+                                    {product.size}
+                                </p>
+                            )}
+
+                            {product.availability && (
+                                <p>
+                                    <b>Availability:</b>
+                                    {product.availability}
+                                </p>
+                            )}
                         </div>
-
                     </div>
                 </div>
 
-                {/* Description + Form */}
+                {/* Description + Form + Full Specifications */}
                 <div className="product-bottom">
-
                     <div className="product-bottom-grid">
-
                         {/* Quote Form */}
-
                         <div className="quote-card">
-
                             <h2 className="quote-title">
                                 Request A Quote
                             </h2>
 
                             <p className="quote-product">
-
                                 Product :
-
-                                <span>
-                                    {product.title}
-                                </span>
-
+                                <span>{product.title}</span>
                             </p>
 
                             <form
                                 onSubmit={handleSubmit}
                                 className="quote-form"
                             >
-
                                 <input
                                     type="text"
                                     placeholder="Your Name"
@@ -621,14 +601,11 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                         ? "Submitting..."
                                         : "Get Quote"}
                                 </button>
-
                             </form>
-
                         </div>
 
-                        {/* Description */}
+                        {/* Description & Full Specification Table */}
                         <div className="product-description-card">
-
                             <h3 className="description-title">
                                 Product Description
                             </h3>
@@ -639,317 +616,277 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                     "No description available."}
                             </p>
 
-                            {/* Specifications */}
-
+                            {/* Specifications Table */}
                             <div className="specification-table">
-
                                 <table>
-
                                     <tbody>
-
-                                        <tr>
-                                            <td>Brand</td>
-                                            <td>{product.brand || "N/A"}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Model</td>
-                                            <td>{product.model || "N/A"}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Usage</td>
-                                            <td>{product.usage || "N/A"}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Automation</td>
-                                            <td>{product.automation || "N/A"}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Capacity</td>
-                                            <td>{product.capacity || "N/A"}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Throughput</td>
-                                            <td>{product.throughput || "N/A"}</td>
-                                        </tr>
-
+                                        {product.brand && (
+                                            <tr>
+                                                <td>Brand</td>
+                                                <td>{product.brand}</td>
+                                            </tr>
+                                        )}
+                                        {product.model && (
+                                            <tr>
+                                                <td>Model</td>
+                                                <td>{product.model}</td>
+                                            </tr>
+                                        )}
+                                        {product.price && (
+                                            <tr>
+                                                <td>Price</td>
+                                                <td>{product.price}</td>
+                                            </tr>
+                                        )}
+                                        {product.instrument && (
+                                            <tr>
+                                                <td>Instrument</td>
+                                                <td>{product.instrument}</td>
+                                            </tr>
+                                        )}
+                                        {product.usage && (
+                                            <tr>
+                                                <td>Usage</td>
+                                                <td>{product.usage}</td>
+                                            </tr>
+                                        )}
+                                        {product.automation && (
+                                            <tr>
+                                                <td>Automation</td>
+                                                <td>{product.automation}</td>
+                                            </tr>
+                                        )}
+                                        {product.capacity && (
+                                            <tr>
+                                                <td>Capacity</td>
+                                                <td>{product.capacity}</td>
+                                            </tr>
+                                        )}
+                                        {product.throughput && (
+                                            <tr>
+                                                <td>Throughput</td>
+                                                <td>{product.throughput}</td>
+                                            </tr>
+                                        )}
+                                        {product.parameters && (
+                                            <tr>
+                                                <td>Parameters</td>
+                                                <td>{product.parameters}</td>
+                                            </tr>
+                                        )}
+                                        {product.size && (
+                                            <tr>
+                                                <td>Size</td>
+                                                <td>{product.size}</td>
+                                            </tr>
+                                        )}
+                                        {product.availability && (
+                                            <tr>
+                                                <td>Availability</td>
+                                                <td>{product.availability}</td>
+                                            </tr>
+                                        )}
                                     </tbody>
-
                                 </table>
-
                             </div>
-
-
 
                             {/* SEO Content */}
                             <div className="seo-content">
-
                                 <div className="seo-block">
-
                                     <h3>
-                                        Why Choose Central Biomedicals in {cityName}?
+                                        Why Choose Human Biomedical in {cityName}?
                                     </h3>
-
                                     <p>
-                                        Central Biomedicals is a trusted supplier and
+                                        Human Biomedical is a trusted supplier and
                                         distributor of {product.title} in {cityName}.
                                         We provide high-quality biomedical and laboratory
                                         equipment for hospitals, pathology laboratories,
                                         diagnostic centres and healthcare facilities.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         Features of {product.title}
                                     </h3>
-
                                     <p>
                                         {product.title} offers reliable performance,
                                         accurate results, easy operation, long service
                                         life and efficient workflow for laboratories
                                         and hospitals.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         Applications of {product.title}
                                     </h3>
-
                                     <p>
                                         Widely used in hospitals, pathology labs,
                                         diagnostic centres, blood banks, research
                                         institutes and healthcare facilities.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         {product.title} Supplier in {cityName}
                                     </h3>
-
                                     <p>
-                                        Central Biomedicals supplies
-                                        {product.title}
-                                        in {cityName} with technical support,
-                                        installation assistance and customer
-                                        service for hospitals and laboratories.
+                                        Human Biomedical supplies {product.title} in {cityName} with technical support,
+                                        installation assistance and customer service for hospitals and laboratories.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         {product.title} Dealer in {cityName}
                                     </h3>
-
                                     <p>
-                                        Central Biomedicals is a trusted dealer of
-                                        {product.title} in {cityName}. We supply
-                                        biomedical equipment, laboratory instruments,
-                                        diagnostic analyzers and healthcare devices
+                                        Human Biomedical is a trusted dealer of {product.title} in {cityName}. We supply
+                                        biomedical equipment, laboratory instruments, diagnostic analyzers and healthcare devices
                                         to hospitals, pathology labs and research centres.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         {product.title} Distributor in {cityName}
                                     </h3>
-
                                     <p>
-                                        Looking for a reliable distributor of
-                                        {product.title} in {cityName}?
-                                        We provide installation support,
-                                        product guidance, maintenance assistance
+                                        Looking for a reliable distributor of {product.title} in {cityName}?
+                                        We provide installation support, product guidance, maintenance assistance
                                         and fast delivery.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         Buy {product.title} in {cityName}
                                     </h3>
-
                                     <p>
-                                        Buy high quality {product.title}
-                                        in {cityName} at competitive prices.
-                                        Contact Central Biomedicals for the
-                                        latest quotation and product availability.
+                                        Buy high quality {product.title} in {cityName} at competitive prices.
+                                        Contact Human Biomedical for the latest quotation and product availability.
                                     </p>
-
                                 </div>
 
                                 <div className="seo-block">
-
                                     <h3>
                                         {product.title} Price in {cityName}
                                     </h3>
-
                                     <p>
-                                        The price of {product.title}
-                                        depends on brand, model,
-                                        specifications and features.
-                                        Contact our team for the latest pricing,
+                                        The price of {product.title} depends on brand, model,
+                                        specifications and features. Contact our team for the latest pricing,
                                         availability and delivery details.
                                     </p>
-
                                 </div>
-
                             </div>
 
                             {/* FAQ Section */}
                             <div className="product-faq">
-
                                 <h3 className="faq-title">
                                     Frequently Asked Questions
                                 </h3>
 
                                 <div className="faq-list">
-
                                     <div className="faq-item">
-
                                         <h4>
                                             What is {product.title} used for in {cityName}?
                                         </h4>
-
                                         <p>
                                             {product.title} is commonly used in hospitals,
                                             pathology laboratories and diagnostic centres.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             What is the price of {product.title} in {cityName}?
                                         </h4>
-
                                         <p>
                                             Pricing depends on specifications,
                                             brand and model. Contact us for a quote.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             Are you an authorized supplier of {product.title}?
                                         </h4>
-
                                         <p>
                                             We supply genuine biomedical and
                                             laboratory equipment from trusted brands.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             Can hospitals in {cityName} order this product?
                                         </h4>
-
                                         <p>
                                             Yes, hospitals, pathology laboratories,
                                             diagnostic centres and healthcare facilities
                                             can order this product.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             Do you provide installation support?
                                         </h4>
-
                                         <p>
                                             Yes, installation and technical support
                                             are available depending on the product.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             Can I request a quotation?
                                         </h4>
-
                                         <p>
                                             Yes, you can submit the enquiry form on
                                             this page to receive pricing and product
                                             information.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             Do you provide warranty?
                                         </h4>
-
                                         <p>
                                             Warranty depends on the manufacturer and
                                             product model.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
                                             Do you deliver across India?
                                         </h4>
-
                                         <p>
                                             Yes, we supply products across India with
                                             safe packaging and logistics support.
                                         </p>
-
                                     </div>
 
                                     <div className="faq-item">
-
                                         <h4>
-                                            How can I contact Central Biomedicals?
+                                            How can I contact Human Biomedical?
                                         </h4>
-
                                         <p>
                                             You can fill out the enquiry form or
                                             contact our team directly for product
                                             details and quotations.
                                         </p>
-
                                     </div>
-
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </section >
+        </section>
     );
 }

@@ -40,23 +40,16 @@ export const metadata = {
   },
 };
 
+import { fetchFullCatalog } from "@/lib/data-fetcher";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getFeaturedProducts() {
   try {
-    const productsRef = collection(db, "products");
-
-    const q = query(
-      productsRef,
-      where("isPublished", "==", true),
-      where("isFeatured", "==", true),
-      limit(6)
-    );
-
-    const snapshot = await getDocs(q);
-
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const catalog = await fetchFullCatalog();
+    const products = Array.isArray(catalog) ? catalog : (catalog.products || []);
+    return products.slice(0, 6);
   } catch (error) {
     console.error("Featured products error:", error);
     return [];

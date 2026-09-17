@@ -1,15 +1,12 @@
+import { fetchFullCatalog } from "@/lib/data-fetcher";
 import { db } from "@/lib/firebase";
-import {
-    collection,
-    getDocs,
-    doc,
-    getDoc,
-} from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function sitemap() {
-    const baseUrl =
-        "https://humanbiomedical.org";
-
+    const baseUrl = "https://humanbiomedical.org";
     const urls = [];
 
     // Static pages
@@ -37,90 +34,61 @@ export default async function sitemap() {
     );
 
     // Districts
-    const districtSnap =
-        await getDocs(
-            collection(
-                db,
-                "websites",
-                "humanbiomedicalorg",
-                "districts"
-            )
+    try {
+        const districtSnap = await getDocs(
+            collection(db, "websites", "humanbiomedicalorg", "districts")
         );
 
-    const districts =
-        districtSnap.docs.map(
-            (doc) => doc.data()
-        );
+        const districts = districtSnap.docs.map((doc) => doc.data());
 
-    districts.forEach((district) => {
-        const slug =
-            district.slug;
-
-        urls.push(
-            {
-                url: `${baseUrl}/${slug}`,
-                lastModified:
-                    new Date(),
-            },
-            {
-                url: `${baseUrl}/${slug}/about`,
-                lastModified:
-                    new Date(),
-            },
-            {
-                url: `${baseUrl}/${slug}/services`,
-                lastModified:
-                    new Date(),
-            },
-            {
-                url: `${baseUrl}/${slug}/contact`,
-                lastModified:
-                    new Date(),
-            },
-            {
-                url: `${baseUrl}/${slug}/items`,
-                lastModified:
-                    new Date(),
-            }
-        );
-    });
-
-    // Products
-    const productDoc =
-        await getDoc(
-            doc(
-                db,
-                "websites",
-                "humanbiomedicalorg",
-                "pages",
-                "products"
-            )
-        );
-
-    const products =
-        productDoc.data()
-            ?.products || [];
-
-    products.forEach(
-        (product) => {
-            urls.push({
-                url: `${baseUrl}/items/${product.slug}`,
-                lastModified:
-                    new Date(),
-            });
-
-            districts.forEach(
-                (district) => {
-                    urls.push({
-                        url:
-                            `${baseUrl}/${district.slug}/items/${product.slug}`,
-                        lastModified:
-                            new Date(),
-                    });
+        districts.forEach((district) => {
+            const slug = district.slug;
+            urls.push(
+                {
+                    url: `${baseUrl}/${slug}`,
+                    lastModified: new Date(),
+                },
+                {
+                    url: `${baseUrl}/${slug}/about`,
+                    lastModified: new Date(),
+                },
+                {
+                    url: `${baseUrl}/${slug}/services`,
+                    lastModified: new Date(),
+                },
+                {
+                    url: `${baseUrl}/${slug}/contact`,
+                    lastModified: new Date(),
+                },
+                {
+                    url: `${baseUrl}/${slug}/items`,
+                    lastModified: new Date(),
                 }
             );
-        }
-    );
+        });
+
+        // Products from Master Catalog
+        const products = await fetchFullCatalog();
+        const productList = Array.isArray(products) ? products : (products.products || []);
+
+        productList.forEach((product) => {
+            if (!product.slug) return;
+
+            urls.push({
+                url: `${baseUrl}/items/${product.slug}`,
+                lastModified: new Date(),
+            });
+
+            districts.forEach((district) => {
+                urls.push({
+                    url: `${baseUrl}/${district.slug}/items/${product.slug}`,
+                    lastModified: new Date(),
+                });
+            });
+        });
+    } catch (err) {
+        console.warn("[sitemap] Error building sitemap:", err.message);
+    }
 
     return urls;
 }

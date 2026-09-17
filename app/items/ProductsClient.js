@@ -148,9 +148,9 @@ export default function ProductsClient({ initialProducts = [], district = null, 
   const [pendingScroll, setPendingScroll] = useState(null);
   const [showTopButton, setShowTopButton] = useState(false);
   const [activeSubCategory, setActiveSubCategory] = useState("");
-  // Client-side fallback to fetch products if server cache is empty (e.g. built offline)
+  // Keep products state in sync with server-provided initialProducts or client fetch
   useEffect(() => {
-    if (initialProducts && initialProducts.length > 0) {
+    if (Array.isArray(initialProducts)) {
       setProducts(initialProducts);
       return;
     }
@@ -158,11 +158,10 @@ export default function ProductsClient({ initialProducts = [], district = null, 
     const loadProductsOnClient = async () => {
       try {
         const data = await fetchFullCatalog();
-        if (data && data.length > 0) {
-          setProducts(data);
-        }
+        setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("[ProductsClient] Error loading catalog on client:", err);
+        setProducts([]);
       }
     };
 
@@ -332,8 +331,8 @@ export default function ProductsClient({ initialProducts = [], district = null, 
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "MedicalEquipmentSupplier",
-            name: "Human Biomedicals",
-            url: "https://humanbiomedical.in",
+            name: "Human Biomedical",
+            url: "https://humanbiomedical.org",
             areaServed: city,
             description: `Medical laboratory and hospital equipment in ${city}`,
             address: {
