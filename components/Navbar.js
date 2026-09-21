@@ -26,12 +26,13 @@ export default function Navbar({ city = "" }) {
   }, [menuOpen]);
 
   const makeLink = (path = "") => {
-    if (!city) {
+    if (!city || city.toLowerCase().trim() === "india") {
       return path || "/";
     }
 
     const slug = city
       .toLowerCase()
+      .trim()
       .replace(/\s+/g, "-");
 
     return `/${slug}${path}`;

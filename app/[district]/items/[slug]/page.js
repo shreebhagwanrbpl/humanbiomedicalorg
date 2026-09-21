@@ -1,7 +1,6 @@
 import ProductDetails from "@/app/items/[slug]/ProductDetails";
 import { fetchProductBySlug } from "@/lib/data-fetcher";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -141,7 +140,6 @@ export default async function Page({ params }) {
                 product={product}
                 city={city}
             />
-            <Footer city={city} />
         </>
     );
 }

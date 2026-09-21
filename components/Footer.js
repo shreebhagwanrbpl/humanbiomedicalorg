@@ -50,9 +50,16 @@ export default function Footer({
     fetchContact();
   }, []);
 
+  const isDistrict = Boolean(
+    city &&
+      typeof city === "string" &&
+      city.trim() !== "" &&
+      city.trim().toLowerCase() !== "india"
+  );
+
   useEffect(() => {
     const fetchDistrict = async () => {
-      if (!city) return;
+      if (!isDistrict) return;
 
       try {
         const snap = await getDoc(
@@ -61,7 +68,7 @@ export default function Footer({
             "websites",
             "humanbiomedicalorg",
             "districts",
-            city.toLowerCase()
+            city.toLowerCase().trim()
           )
         );
 
@@ -76,7 +83,7 @@ export default function Footer({
     };
 
     fetchDistrict();
-  }, [city]);
+  }, [city, isDistrict]);
 
   const getValue = (label) => {
     return (
@@ -91,12 +98,13 @@ export default function Footer({
   };
 
   const makeLink = (path = "") => {
-    if (!city) {
+    if (!isDistrict) {
       return path || "/";
     }
 
     const slug = city
       .toLowerCase()
+      .trim()
       .replace(/\s+/g, "-");
 
     return `/${slug}${path}`;
@@ -240,9 +248,9 @@ export default function Footer({
                 <>
                   <p>
                     📍{" "}
-                    {city
-                      ? `${city}, ${stateName}, India`
-                      : getValue("Address")}
+                    {isDistrict
+                      ? `${city}${stateName ? `, ${stateName}` : ""}, India`
+                      : (getValue("Address") || "India")}
                   </p>
 
                   <p>
