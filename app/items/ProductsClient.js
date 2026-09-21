@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
+import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import {
@@ -636,6 +637,7 @@ export default function ProductsClient({ initialProducts = [], district = null, 
           ↑
         </button>
       )}
+      <Footer city={city} />
     </>
   );
 }
