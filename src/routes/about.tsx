@@ -9,9 +9,9 @@ import teamImg from "@/assets/team.jpg";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Raj Biosis — Our Story & Mission" },
-      { name: "description", content: "Learn about Raj Biosis — 15+ years of supplying premium laboratory and medical equipment to clinical and research institutions." },
-      { property: "og:title", content: "About Raj Biosis — Our Story & Mission" },
+      { title: "About Human Biomedical — Our Story & Mission" },
+      { name: "description", content: "Learn about Human Biomedical — 15+ years of supplying premium laboratory and medical equipment to clinical and research institutions." },
+      { property: "og:title", content: "About Human Biomedical — Our Story & Mission" },
       { property: "og:description", content: "15+ years of supplying premium laboratory and medical equipment to leading institutions." },
       { property: "og:image", content: teamImg },
       { name: "twitter:image", content: teamImg },
@@ -39,19 +39,19 @@ function AboutPage() {
       <PageHero
         eyebrow="About Us"
         title="Built on precision. Driven by purpose."
-        description="For over 15 years, Raj Biosis has helped hospitals, diagnostic centers and research labs deliver better outcomes with the right equipment and unwavering support."
+        description="For over 15 years, Human Biomedical has helped hospitals, diagnostic centers and research labs deliver better outcomes with the right equipment and unwavering support."
       />
 
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2">
         <div className="overflow-hidden rounded-3xl shadow-card ring-1 ring-border/60">
-          <img src={teamImg} alt="Raj Biosis team in laboratory" loading="lazy" width={1400} height={1000} className="h-full w-full object-cover" />
+          <img src={teamImg} alt="Human Biomedical team in laboratory" loading="lazy" width={1400} height={1000} className="h-full w-full object-cover" />
         </div>
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-brand">Our Story</span>
           <h2 className="mt-3 font-serif text-4xl font-semibold md:text-5xl">A partner you can rely on</h2>
           <p className="mt-5 leading-relaxed text-muted-foreground">
             Founded with a simple commitment — to bring honest, high-quality scientific equipment to Indian
-            laboratories — Raj Biosis has grown into a trusted name across hospitals, universities and
+            laboratories — Human Biomedical has grown into a trusted name across hospitals, universities and
             biotech research centers.
           </p>
           <ul className="mt-6 space-y-3">

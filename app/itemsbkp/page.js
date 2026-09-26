@@ -3,8 +3,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEffect, useMemo, useState } from "react";
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { fetchFullCatalog } from "@/lib/data-fetcher";
 import "./item.css"
 import { Search, ChevronRight, ChevronDown } from "lucide-react";
 import { ChevronUp } from "lucide-react";
@@ -27,67 +26,18 @@ export default function ItemsPage({
   const [visible, setVisible] = useState(12);
   useEffect(() => {
     const fetchProducts = async () => {
-      const categorySnap = await getDocs(
-        collection(
-          db,
-          "websites",
-          "humanbiomedicalorg",
-          "pages",
-          "categoryproducts",
-          "categories"
-        )
-      );
+      try {
+        const catalog = await fetchFullCatalog();
+        const productList = Array.isArray(catalog) ? catalog : (catalog.products || []);
+        const categories = catalog.categories || [];
 
-      const allProducts = [];
-      const categoryList = [];
-
-      categorySnap.forEach((categoryDoc) => {
-        const data = categoryDoc.data();
-
-        categoryList.push({
-          id: categoryDoc.id,
-          category: data.category || categoryDoc.id,
-        });
-
-        const categoryProducts = (data.products || [])
-          .filter((p) => p.isPublished !== false)
-          .map((item, index) => ({
-            ...item,
-            uid: `${categoryDoc.id}-${index}`,
-            category: data.category || categoryDoc.id,
-          }));
-
-        allProducts.push(...categoryProducts);
-      });
-
-      const oldSnap = await getDoc(
-        doc(
-          db,
-          "websites",
-          "humanbiomedicalorg",
-          "pages",
-          "products"
-        )
-      );
-
-      if (oldSnap.exists()) {
-        const oldProducts = (oldSnap.data().products || [])
-          .filter((p) => p.isPublished !== false)
-          .map((item, index) => ({
-            ...item,
-            uid: `other-${index}`,
-            category: "Other Products",
-          }));
-
-        allProducts.push(...oldProducts);
+        setProducts(productList);
+        setAllCategories(categories);
+      } catch (err) {
+        console.error("[itemsbkp] Error fetching products:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setProducts(allProducts);
-      setAllCategories(categoryList);
-
-
-
-      setLoading(false);
     };
 
     fetchProducts();

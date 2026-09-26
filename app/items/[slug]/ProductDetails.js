@@ -15,12 +15,6 @@ import {
     FaLink,
 } from "react-icons/fa";
 
-import {
-    addDoc,
-    collection,
-} from "firebase/firestore";
-
-import { db } from "@/lib/firebase";
 import { fetchFullCatalog } from "@/lib/data-fetcher";
 import ProductBrochureButton from "@/components/ProductBrochureButton";
 
@@ -228,62 +222,49 @@ export default function ProductDetails({
 
 
         try {
-
             setSubmitting(true);
 
-
-            await addDoc(
-                collection(
-                    db,
-                    "websitesQueries",
-                    "humanbiomedicalorg",
-                    "productQueries"
-                ),
-                {
-                    ...form,
-
-                    productName:
-                        product?.title || "",
-
-                    productSlug:
-                        product?.slug || slug,
-
-                    brand:
-                        product?.brand || "",
-
-                    model:
-                        product?.model || "",
-
-                    createdAt: new Date(),
-                }
-            );
-
-
-            toast.success(
-                "Your enquiry has been submitted successfully."
-            );
-
-
-            setForm({
-                name: "",
-                email: "",
-                phone: "",
+            const res = await fetch("/api/product-query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: form.name.trim(),
+                    email: form.email.trim(),
+                    phone: form.phone.trim(),
+                    productName: product?.title || product?.name || "",
+                    productSlug: product?.slug || slug,
+                    brand: product?.brand || "",
+                    model: product?.model || "",
+                }),
             });
 
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok && data.success !== false) {
+                toast.success(
+                    data.message || "Your enquiry has been submitted successfully."
+                );
+
+                setForm({
+                    name: "",
+                    email: "",
+                    phone: "",
+                });
+            } else {
+                toast.error(data.error || "Failed to submit enquiry. Please try again.");
+            }
 
         } catch (error) {
-
             console.error(
                 "Error submitting query:",
                 error
             );
-
             toast.error(
                 "Something went wrong"
             );
-
         } finally {
-
             setSubmitting(false);
         }
     };

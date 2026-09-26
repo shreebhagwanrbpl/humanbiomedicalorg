@@ -12,9 +12,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Raj Biosis — Get a Quote" },
-      { name: "description", content: "Get in touch with Raj Biosis for product enquiries, quotes and service requests. Call, email or send a message." },
-      { property: "og:title", content: "Contact Raj Biosis — Get a Quote" },
+      { title: "Contact Human Biomedical — Get a Quote" },
+      { name: "description", content: "Get in touch with Human Biomedical for product enquiries, quotes and service requests. Call, email or send a message." },
+      { property: "og:title", content: "Contact Human Biomedical — Get a Quote" },
       { property: "og:description", content: "Reach our specialists for product enquiries, quotes and service requests." },
     ],
   }),
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 const channels = [
-  { icon: Mail, label: "Email", value: "info@rajbiosis.com" },
+  { icon: Mail, label: "Email", value: "info@humanbiomedical.org" },
   { icon: Phone, label: "Phone", value: "099833 33469" },
   { icon: MapPin, label: "Office", value: "F-4, 1st Floor, Plot No. 16, D-Block Tagor Nagar,on Ajmer-Delhi, 200 Feet Bypass Rd, Jaipur, Rajasthan 302021"},
   { icon: Clock, label: "Hours", value: "Mon – Sat, 9:30 AM – 7:00 PM" },

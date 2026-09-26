@@ -1,74 +1,41 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { fetchAdminCatalog, fetchAdminSiteData, WEBSITE_ID } from "@/lib/admin-api";
 
-const WEBSITE = "humanbiomedicalorg";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const DOMAIN = "https://humanbiomedical.org";
 
 export async function GET() {
     try {
         // Districts
-        const districtSnap = await adminDb
-            .collection("websites")
-            .doc(WEBSITE)
-            .collection("districts")
-            .get();
+        const districtRes = await fetchAdminSiteData({ type: "districts" });
+        const rawDistricts = districtRes?.districts || districtRes?.data || [];
+        const districts = Array.isArray(rawDistricts) ? rawDistricts : [];
 
-        const districts = districtSnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-
-        // Products Document
-        const productDoc = await adminDb
-            .collection("websites")
-            .doc(WEBSITE)
-            .collection("pages")
-            .doc("products")
-            .get();
-
-        const productData = productDoc.exists ? productDoc.data() : {};
-
-        const products = productData.products || [];
-
-        // Categories
-        const categorySnap = await adminDb
-            .collection("websites")
-            .doc(WEBSITE)
-            .collection("pages")
-            .doc("categoryproducts")
-            .collection("categories")
-            .get();
-
-        const categories = categorySnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-
-        // ===========================
-        // Published Products
-        // ===========================
+        // Catalog
+        const catalog = await fetchAdminCatalog();
+        const products = Array.isArray(catalog.products) ? catalog.products : [];
+        const categories = Array.isArray(catalog.categories) ? catalog.categories : [];
 
         const publishedProducts = products.filter(
-            (item) => item.isPublished === true
+            (item) => item.isPublished !== false && item.status !== "inactive"
         );
 
         // ===========================
         // Categories
         // ===========================
-
         const categoryText =
             categories.length > 0
                 ? categories
                     .map((cat) => {
-
                         const productList =
                             (cat.products || [])
-                                .map((item) => `- ${item.title}`)
+                                .map((item) => `- ${item.title || item.name}`)
                                 .join("\n");
 
                         return `
-
-## ${cat.category}
+## ${cat.name || cat.category || cat.id}
 
 Category ID:
 ${cat.id}
@@ -76,12 +43,9 @@ ${cat.id}
 Total Products:
 ${cat.products?.length || 0}
 
-Products
-
+Products:
 ${productList || "No Products"}
-
 `;
-
                     })
                     .join("\n")
                 : "No Categories Found";
@@ -89,15 +53,12 @@ ${productList || "No Products"}
         // ===========================
         // Products
         // ===========================
-
         const productText =
             publishedProducts.length > 0
                 ? publishedProducts
                     .map((product) => {
-
                         return `
-
-# ${product.title}
+# ${product.title || product.name}
 
 Category:
 ${product.category || "N/A"}
@@ -109,7 +70,7 @@ Model:
 ${product.model || "N/A"}
 
 Description:
-${product.desc || "No description available"}
+${product.desc || product.description || "No description available"}
 
 Instrument:
 ${product.instrument || "N/A"}
@@ -133,44 +94,37 @@ Price:
 ${product.price || "Contact for Price"}
 
 Product URL:
-
 ${DOMAIN}/items/${product.slug || product.id}
 
-
-
-
-${[product.title, product.brand, product.category, product.model,
-                            product.instrument,
-                            product.automation,
-                            product.usage,
-                            ]
-                                .filter(Boolean)
-                                .join(", ")
-                            }
+${[
+    product.title || product.name,
+    product.brand,
+    product.category,
+    product.model,
+    product.instrument,
+    product.automation,
+    product.usage,
+]
+    .filter(Boolean)
+    .join(", ")}
 `;
                     })
                     .join("\n")
                 : "No Products Found";
 
-
         // ===========================
         // Districts
         // ===========================
-
         const districtText =
             districts.length > 0
                 ? districts
-                    .map(
-                        (item) =>
-                            `${DOMAIN}/${item.slug}`
-                    )
+                    .map((item) => `${DOMAIN}/${item.slug}`)
                     .join("\n")
                 : "No Districts Found";
 
         // ===========================
-        // llms.txt
+        // llms.txt content
         // ===========================
-
         const content = `
 ## Statistics
 
@@ -182,31 +136,27 @@ ${categories.length}
 
 Districts:
 ${districts.length}
+
 # Human Biomedical
 
 India's Trusted Biomedical Equipment Company
 
-Website
-
+Website:
 ${DOMAIN}
 
-Published Products
-
+Published Products:
 ${publishedProducts.length}
 
-Categories
-
+Categories:
 ${categories.length}
 
-District Pages
-
+District Pages:
 ${districts.length}
-Company
 
+Company:
 Human Biomedical is one of India's trusted Biomedical Equipment suppliers.
 
-Services
-
+Services:
 - Biomedical Equipment Supply
 - Laboratory Equipment
 - Diagnostic Equipment
@@ -217,29 +167,9 @@ Services
 - Technical Support
 - Pan India Delivery
 
-Search Keywords
+Search Keywords:
+Biomedical Equipment, Laboratory Equipment, Diagnostic Equipment, Hospital Equipment, Medical Equipment, ICU Equipment, Operation Theatre Equipment, Biochemistry Analyzer, Electrolyte Analyzer, CLIA Analyzer, Immunoassay Analyzer
 
-Biomedical Equipment
-
-Laboratory Equipment
-
-Diagnostic Equipment
-
-Hospital Equipment
-
-Medical Equipment
-
-ICU Equipment
-
-Operation Theatre Equipment
-
-Biochemistry Analyzer
-
-Electrolyte Analyzer
-
-CLIA Analyzer
-
-Immunoassay Analyzer
 ------------------------------------------------
 
 ## Categories
@@ -260,22 +190,19 @@ ${districtText}
 
 ------------------------------------------------
 
-Sitemap
-
+Sitemap:
 ${DOMAIN}/sitemap.xml
 
-Robots
-
+Robots:
 ${DOMAIN}/robots.txt
 
-Contact
-
+Contact:
 ${DOMAIN}/contact
-Last Updated
 
+Last Updated:
 ${new Date().toISOString()}
-
 `;
+
         return new NextResponse(content, {
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
@@ -293,5 +220,4 @@ ${new Date().toISOString()}
             }
         );
     }
-
 }

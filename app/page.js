@@ -3,8 +3,7 @@ import Footer from "@/components/Footer";
 import Script from "next/script";
 import HomeHero from "@/components/HomeHero";
 import Link from "next/link";
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+
 
 export const metadata = {
   title:

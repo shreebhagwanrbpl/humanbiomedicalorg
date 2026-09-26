@@ -8,9 +8,9 @@ import beakers from "@/assets/beakers.jpg";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services — Installation, Calibration & AMC | Raj Biosis" },
+      { title: "Services — Installation, Calibration & AMC | Human Biomedical" },
       { name: "description", content: "Complete lifecycle services for lab and medical equipment: consultation, installation, calibration, training and AMC." },
-      { property: "og:title", content: "Services — Installation, Calibration & AMC | Raj Biosis" },
+      { property: "og:title", content: "Services — Installation, Calibration & AMC | Human Biomedical" },
       { property: "og:description", content: "Complete lifecycle services: consultation, installation, calibration, training and AMC." },
       { property: "og:image", content: beakers },
       { name: "twitter:image", content: beakers },

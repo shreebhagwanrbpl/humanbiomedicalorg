@@ -11,9 +11,9 @@ import heroLab from "@/assets/hero-lab.jpg";
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
-      { title: "Products — Lab & Medical Equipment Catalog | Raj Biosis" },
+      { title: "Products — Lab & Medical Equipment Catalog | Human Biomedical" },
       { name: "description", content: "Browse our curated catalog of microscopes, analyzers, centrifuges, autoclaves and laboratory consumables." },
-      { property: "og:title", content: "Products — Lab & Medical Equipment Catalog | Raj Biosis" },
+      { property: "og:title", content: "Products — Lab & Medical Equipment Catalog | Human Biomedical" },
       { property: "og:description", content: "Microscopes, analyzers, centrifuges, autoclaves and laboratory consumables." },
       { property: "og:image", content: analyzer },
       { name: "twitter:image", content: analyzer },
@@ -38,7 +38,7 @@ function ProductsPage() {
       <PageHero
         eyebrow="Products"
         title="A catalog built for performance"
-        description="Discover instruments selected for accuracy, durability and ease of use — backed by the Raj Biosis service promise."
+        description="Discover instruments selected for accuracy, durability and ease of use — backed by the Human Biomedical service promise."
       />
       
       <section className="mx-auto max-w-7xl px-6 py-16">

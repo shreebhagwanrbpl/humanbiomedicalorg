@@ -1,6 +1,5 @@
 import { fetchFullCatalog } from "@/lib/data-fetcher";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { fetchAdminSiteData } from "@/lib/admin-api";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -33,16 +32,16 @@ export default async function sitemap() {
         }
     );
 
-    // Districts
+    // Districts & Products
     try {
-        const districtSnap = await getDocs(
-            collection(db, "websites", "humanbiomedicalorg", "districts")
-        );
-
-        const districts = districtSnap.docs.map((doc) => doc.data());
+        const districtsRes = await fetchAdminSiteData({ type: "districts" });
+        const rawDistricts = districtsRes?.districts || districtsRes?.data || [];
+        const districts = Array.isArray(rawDistricts) ? rawDistricts : [];
 
         districts.forEach((district) => {
             const slug = district.slug;
+            if (!slug) return;
+
             urls.push(
                 {
                     url: `${baseUrl}/${slug}`,
@@ -80,6 +79,7 @@ export default async function sitemap() {
             });
 
             districts.forEach((district) => {
+                if (!district.slug) return;
                 urls.push({
                     url: `${baseUrl}/${district.slug}/items/${product.slug}`,
                     lastModified: new Date(),

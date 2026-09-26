@@ -27,9 +27,9 @@ export function Navbar() {
           />
         </div>
           <div className="leading-tight">
-            <div className="font-serif text-lg font-semibold text-foreground">Raj Biosis</div>
+            <div className="font-serif text-lg font-semibold text-foreground">Human Biomedical</div>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Private Limited
+              Equipment & Solutions
             </div>
           </div>
         </Link>

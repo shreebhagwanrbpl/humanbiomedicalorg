@@ -1,19 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getDocs, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { fetchProductBySlug } from "@/lib/data-fetcher";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+
 export default function ProductDetails({
     slug,
     city = "",
 }) {
-    const [product, setProduct] =
-        useState(null);
+    const [product, setProduct] = useState(null);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -32,95 +30,20 @@ export default function ProductDetails({
             )
             .join(" ")
         : "India";
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                let foundProduct = null;
-
-                // OLD PRODUCTS
-                const oldSnap = await getDoc(
-                    doc(
-                        db,
-                        "websites",
-                        "humanbiomedicalorg",
-                        "pages",
-                        "products"
-                    )
-                );
-
-                if (oldSnap.exists()) {
-                    const products =
-                        oldSnap.data().products || [];
-
-                    foundProduct = products.find((item) => {
-                        const generatedSlug =
-                            item.title
-                                ?.toLowerCase()
-                                .replace(/\s+/g, "-")
-                                .replace(/[^\w-]+/g, "");
-
-                        return generatedSlug === slug;
-                    });
-                }
-
-                // CATEGORY PRODUCTS
-                if (!foundProduct) {
-                    const categorySnap = await getDocs(
-                        collection(
-                            db,
-                            "websites",
-                            "humanbiomedicalorg",
-                            "pages",
-                            "categoryproducts",
-                            "categories"
-                        )
-                    );
-
-                    categorySnap.forEach((categoryDoc) => {
-                        const categoryProducts =
-                            categoryDoc.data().products || [];
-
-                        const match =
-                            categoryProducts.find((item) => {
-                                const generatedSlug =
-                                    item.title
-                                        ?.toLowerCase()
-                                        .replace(/\s+/g, "-")
-                                        .replace(/[^\w-]+/g, "");
-
-                                return (
-                                    generatedSlug === slug
-                                );
-                            });
-
-                        if (match) {
-                            foundProduct = {
-                                ...match,
-                                category:
-                                    categoryDoc.data()
-                                        .category ||
-                                    categoryDoc.id,
-                            };
-                        }
-                    });
-                }
-
-                console.log(
-                    "FOUND PRODUCT =",
-                    foundProduct
-                );
-
+                const foundProduct = await fetchProductBySlug(slug);
                 setProduct(foundProduct);
             } catch (error) {
-                console.error(
-                    "Error fetching product:",
-                    error
-                );
+                console.error("Error fetching product:", error);
             }
         };
 
         fetchProduct();
     }, [slug]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -136,8 +59,7 @@ export default function ProductDetails({
             return;
         }
 
-        const emailRegex =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
             toast.error("Invalid email");
@@ -149,7 +71,7 @@ export default function ProductDetails({
             return;
         }
 
-        if (!/^[0-9]{10}$/.test(phone)) {
+        if (!/^[0-9]{10}$/.test(phone.trim())) {
             toast.error("Enter valid 10 digit phone");
             return;
         }
@@ -157,33 +79,34 @@ export default function ProductDetails({
         try {
             setSubmitting(true);
 
-            await addDoc(
-                collection(
-                    db,
-                    "websitesQueries",
-                    "humanbiomedicalorg",
-                    "productQueries"
-                ),
-                {
-                    name,
-                    email,
-                    phone,
-                    productName: product.title,
-                    productSlug: product.slug,
-                    createdAt: serverTimestamp(),
-                }
-            );
-
-            toast.success(
-                "Enquiry submitted successfully"
-            );
-
-            setFormData({
-                name: "",
-                email: "",
-                phone: "",
+            const res = await fetch("/api/product-query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name.trim(),
+                    email: email.trim(),
+                    phone: phone.trim(),
+                    productName: product?.title || product?.name || "",
+                    productSlug: product?.slug || slug,
+                    brand: product?.brand || "",
+                    model: product?.model || "",
+                }),
             });
 
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok && data.success !== false) {
+                toast.success(data.message || "Enquiry submitted successfully");
+                setFormData({
+                    name: "",
+                    email: "",
+                    phone: "",
+                });
+            } else {
+                toast.error(data.error || "Something went wrong");
+            }
         } catch (error) {
             console.error(error);
             toast.error("Something went wrong");
@@ -191,30 +114,24 @@ export default function ProductDetails({
             setSubmitting(false);
         }
     };
+
     const [zoomPos, setZoomPos] = useState({
         x: 50,
         y: 50,
     });
+
     if (!product) {
         return (
             <>
                 <Navbar city={city} />
-
                 <section className="max-w-7xl mx-auto px-6 py-20 animate-pulse">
-
                     <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-
                         <div className="bg-gray-200 rounded-3xl h-[300px] sm:h-[450px] lg:h-[500px]"></div>
-
                         <div>
-
                             <div className="h-14 bg-gray-200 rounded-xl w-3/4"></div>
-
                             <div className="mt-6 h-6 bg-gray-200 rounded"></div>
                             <div className="mt-3 h-6 bg-gray-200 rounded w-5/6"></div>
-
                             <div className="grid grid-cols-2 gap-4 mt-10">
-
                                 {[...Array(6)].map((_, i) => (
                                     <div
                                         key={i}
@@ -224,15 +141,10 @@ export default function ProductDetails({
                                         <div className="h-6 bg-gray-200 rounded w-28 mt-3"></div>
                                     </div>
                                 ))}
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </section>
-
                 <Footer city={city} />
             </>
         );
@@ -244,12 +156,9 @@ export default function ProductDetails({
             <Navbar city={city} />
 
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
-
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-
                     {/* LEFT MEDIA */}
                     <div className="space-y-4">
-
                         {/* MAIN PREVIEW */}
                         <div
                             className="
@@ -326,7 +235,6 @@ export default function ProductDetails({
 
                         {/* THUMBNAILS */}
                         <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-
                             {/* Images */}
                             {product.images?.map((img, index) => (
                                 <img
@@ -417,24 +325,20 @@ export default function ProductDetails({
                                     </span>
                                 </a>
                             )}
-
                         </div>
-
                     </div>
 
                     {/* RIGHT CONTENT */}
                     <div>
-
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">
                             {product.title}
                         </h1>
 
                         <p className="mt-5 text-gray-600 text-lg">
-                            {product.description}
+                            {product.description || product.desc}
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-
                             <div className="border rounded-2xl p-4 sm:p-5">
                                 <p className="text-gray-500">Brand</p>
                                 <h3 className="font-bold mt-2">
@@ -483,16 +387,12 @@ export default function ProductDetails({
                                     {product.instrument}
                                 </h3>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 {/* ENQUIRY FORM */}
                 <div className="mt-20">
-
                     <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-6 sm:mb-8">
                         Send Enquiry
                     </h2>
@@ -501,9 +401,7 @@ export default function ProductDetails({
                         onSubmit={handleSubmit}
                         className="bg-white border rounded-3xl p-5 sm:p-8"
                     >
-
                         <div className="grid md:grid-cols-2 gap-5">
-
                             <input
                                 type="text"
                                 placeholder="Your Name"
@@ -542,7 +440,6 @@ export default function ProductDetails({
                                 }
                                 className="border rounded-xl p-4 md:col-span-2"
                             />
-
                         </div>
 
                         <button
@@ -566,18 +463,15 @@ transition
                                 ? "Submitting..."
                                 : "Submit Enquiry"}
                         </button>
-
                     </form>
-
                 </div>
-                <div className="mt-16 bg-white border rounded-3xl p-8">
 
+                <div className="mt-16 bg-white border rounded-3xl p-8">
                     <h2 className="text-3xl font-black mb-6">
                         {product.title} in {cityName}
                     </h2>
 
                     <div className="space-y-5 text-gray-700 leading-8">
-
                         <p>
                             We are a trusted {product.title} supplier in{" "}
                             {cityName}, providing advanced biomedical
@@ -604,7 +498,6 @@ transition
                             price in {cityName}, product specifications,
                             quotation, and availability.
                         </p>
-
                     </div>
 
                     <div className="mt-8">
@@ -613,7 +506,6 @@ transition
                         </h3>
 
                         <div className="grid md:grid-cols-2 gap-3 text-blue-600 font-medium">
-
                             <div>{product.title} in {cityName}</div>
                             <div>{product.title} Supplier in {cityName}</div>
                             <div>{product.title} Dealer in {cityName}</div>
@@ -622,10 +514,8 @@ transition
                             <div>{product.title} Price in {cityName}</div>
                             <div>Buy {product.title} in {cityName}</div>
                             <div>{product.title} Service Provider in {cityName}</div>
-
                         </div>
                     </div>
-
                 </div>
             </section>
 

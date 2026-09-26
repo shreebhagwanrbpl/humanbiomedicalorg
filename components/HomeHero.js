@@ -1,131 +1,155 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 export default function HomeHero({ city }) {
-    const [data, setData] = useState(null);
+    const [data, setData] = useState({
+        title: "",
+        description: "",
+        button1Text: "",
+        button2Text: "",
+        image: "/hero-biomedical.jpg",
+    });
 
     useEffect(() => {
         const fetchData = async () => {
-            const snap = await getDoc(
-                doc(
-                    db,
-                    "websites",
-                    "humanbiomedicalorg",
-                    "pages",
-                    "home"
-                )
-            );
-
-            if (snap.exists()) {
-                setData(snap.data());
+            try {
+                const res = await fetch("/api/site-data?type=home");
+                if (res.ok) {
+                    const json = await res.json();
+                    const pageData = json?.data || json;
+                    if (pageData) {
+                        setData((prev) => ({
+                            ...prev,
+                            ...pageData,
+                            image:
+                                pageData.image ||
+                                pageData.imageUrl ||
+                                pageData.heroImage ||
+                                pageData.img ||
+                                (Array.isArray(pageData.images) && pageData.images[0]) ||
+                                (Array.isArray(pageData.media) && pageData.media[0]?.url) ||
+                                prev.image,
+                        }));
+                    }
+                }
+            } catch (err) {
+                console.error("[HomeHero] Error fetching home page data:", err);
             }
         };
 
         fetchData();
     }, []);
+
     const makeLink = (path = "") => {
+        const cleanPath = path || "/";
         if (!city) {
-            return path || "/";
+            return cleanPath;
         }
 
         const slug = city
             .toLowerCase()
             .replace(/\s+/g, "-");
 
-        return `/${slug}${path}`;
+        return `/${slug}${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
     };
-    if (!data) {
-        return (
-            <section className="pt-24 md:pt-32 pb-16 md:pb-24 px-4 sm:px-6">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 animate-pulse">
 
-                    <div>
-                        <div className="h-16 bg-gray-200 rounded-xl w-3/4"></div>
-                        <div className="mt-4 h-6 bg-gray-200 rounded w-full"></div>
-                        <div className="mt-2 h-6 bg-gray-200 rounded w-5/6"></div>
+    const heroImage =
+        data?.image ||
+        data?.imageUrl ||
+        data?.heroImage ||
+        data?.img ||
+        "/hero-biomedical.jpg";
 
-                        <div className="flex gap-4 mt-8">
-                            <div className="h-14 w-40 bg-gray-200 rounded-2xl"></div>
-                            <div className="h-14 w-40 bg-gray-200 rounded-2xl"></div>
-                        </div>
-                    </div>
+    const titleText = data?.title
+        ? `${data.title}${city ? ` in ${city}` : ""}`
+        : "";
 
-                    <div className="h-[500px] bg-gray-200 rounded-[40px]"></div>
-
-                </div>
-            </section>
-        );
-    }
+    const descText = data?.description
+        ? `${data.description}${city ? ` serving hospitals and laboratories in ${city}` : ""}`
+        : "";
 
     return (
-        <section className="relative overflow-hidden pt-24 md:pt-32 pb-16 md:pb-24 px-4 sm:px-6">
-            <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-
+        <section className="relative overflow-hidden pt-2 sm:pt-4 pb-8 sm:pb-10 px-4 sm:px-6">
+            <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                 <div>
-                    <h1 className="mt-6 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-gray-900">
-                        {data.title}
-                        {city && ` in ${city}`}
-                    </h1>
-
-                    <p className="mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-gray-600 max-w-2xl">
-                        {data.description}
-                        {city && ` serving hospitals and laboratories in ${city}`}
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                        <a
-                            href={makeLink("/items")}
-                            className="w-full sm:w-auto text-center px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white"
+                    {titleText ? (
+                        <h1
+                            className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-black leading-[1.15] text-gray-950 line-clamp-2 tracking-tight"
+                            title={titleText}
                         >
-                            {data.button1Text}
-                        </a>
+                            {titleText}
+                        </h1>
+                    ) : null}
 
-                        <a
-                            href={makeLink("/contact")}
-                            className="w-full sm:w-auto text-center px-8 py-4 rounded-2xl border border-blue-200"
-                        >
-                            {data.button2Text}
-                        </a>
-                    </div>
+                    {descText ? (
+                        <p className="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-gray-600 max-w-2xl line-clamp-3">
+                            {descText}
+                        </p>
+                    ) : null}
+
+                    {(data?.button1Text || data?.button2Text) ? (
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6">
+                            {data?.button1Text ? (
+                                <a
+                                    href={makeLink(data?.button1Link || "/items")}
+                                    className="w-full sm:w-auto text-center px-7 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white font-bold shadow-[0_10px_25px_rgba(14,165,233,0.3)] hover:shadow-[0_15px_30px_rgba(14,165,233,0.4)] hover:-translate-y-0.5 transition duration-300"
+                                >
+                                    {data?.button1Text}
+                                </a>
+                            ) : null}
+
+                            {data?.button2Text ? (
+                                <a
+                                    href={makeLink(data?.button2Link || "/contact")}
+                                    className="w-full sm:w-auto text-center px-7 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-800 font-bold shadow-sm hover:border-blue-200 hover:bg-blue-50/50 hover:text-blue-700 hover:-translate-y-0.5 transition duration-300"
+                                >
+                                    {data?.button2Text}
+                                </a>
+                            ) : null}
+                        </div>
+                    ) : null}
                 </div>
 
-                <div className="relative flex justify-center">
+                {/* HERO IMAGE */}
+                <div className="relative flex justify-center lg:justify-end">
+                    <div className="relative w-full max-w-[500px]">
+                        {/* Glow accent */}
+                        <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/10 via-cyan-400/15 to-blue-600/10 rounded-[36px] blur-xl" />
 
-                    <div className="relative">
-
-                        <div className="bg-white/70 backdrop-blur-2xl rounded-[24px] md:rounded-[40px] border border-white shadow-2xl p-3 sm:p-4 md:p-6">
-
-                            <img
-                                src="https://images.unsplash.com/photo-1579165466741-7f35e4755660?q=80&w=1200&auto=format&fit=crop"
-                                alt="Biomedical Equipment"
-                                className="w-full max-w-[520px] h-[280px] sm:h-[420px] lg:h-[600px] object-cover rounded-[20px] md:rounded-[30px]"
-                            />
-
+                        {/* Image Frame */}
+                        <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px] border border-gray-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-2.5 sm:p-3.5">
+                            <div className="overflow-hidden rounded-[22px] sm:rounded-[28px] bg-slate-50">
+                                <img
+                                    src={heroImage}
+                                    alt="Biomedical Equipment"
+                                    className="w-full h-[260px] sm:h-[320px] lg:h-[370px] object-cover transition duration-700 hover:scale-105"
+                                    loading="eager"
+                                    onError={(e) => {
+                                        e.currentTarget.src = "/hero-biomedical.jpg";
+                                    }}
+                                />
+                            </div>
                         </div>
 
-                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:-bottom-8 lg:-left-8 bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-2xl border border-blue-100 w-[180px] sm:w-[220px] md:w-64">
-
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center text-white text-2xl shadow-lg">
+                        {/* Floating Badge */}
+                        <div className="absolute -bottom-4 left-6 sm:-bottom-5 sm:left-6 bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-blue-100/80 flex items-center gap-3 sm:gap-4 max-w-[240px] sm:max-w-[270px]">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white text-lg sm:text-xl shadow-md shrink-0">
                                 🧪
                             </div>
 
-                            <h3 className="mt-4 text-base sm:text-lg md:text-xl font-bold text-gray-900">
-                                Smart Laboratory Solutions
-                            </h3>
+                            <div className="min-w-0">
+                                <h3 className="text-xs sm:text-sm font-bold text-gray-950 leading-tight truncate">
+                                    Smart Lab Solutions
+                                </h3>
 
-                            <p className="mt-2 text-gray-600 leading-6 text-xs md:text-sm">
-                                Advanced pathology and healthcare automation systems.
-                            </p>
-
+                                <p className="mt-0.5 text-[11px] sm:text-xs text-gray-500 leading-tight truncate">
+                                    Pathology & Automation
+                                </p>
+                            </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
         </section>
     );

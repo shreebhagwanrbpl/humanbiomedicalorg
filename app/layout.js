@@ -1,5 +1,4 @@
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 export const metadata = {
   metadataBase: new URL(
     "https://humanbiomedical.org"
@@ -88,9 +87,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
         {children}
-
       </body>
     </html>
   );

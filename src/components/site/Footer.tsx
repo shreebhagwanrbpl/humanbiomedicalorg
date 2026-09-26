@@ -44,7 +44,7 @@ export function Footer() {
         <div>
           <h4 className="font-serif text-sm font-semibold text-foreground">Contact</h4>
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2"><Mail className="mt-0.5 h-4 w-4 text-brand" /> info@rajbiosis.com</li>
+            <li className="flex items-start gap-2"><Mail className="mt-0.5 h-4 w-4 text-brand" /> info@humanbiomedical.org</li>
             <li className="flex items-start gap-2"><Phone className="mt-0.5 h-4 w-4 text-brand" /> 099833 334690</li>
             <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 text-brand" /> Jaipur, India</li>
           </ul>
@@ -52,7 +52,7 @@ export function Footer() {
       </div>
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-6 py-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} Raj Biosis. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Human Biomedical. All rights reserved.</p>
           <p>Crafted with care for healthcare professionals.</p>
         </div>
       </div>
