@@ -39,10 +39,9 @@ export const metadata = {
   },
 };
 
-import { fetchFullCatalog } from "@/lib/data-fetcher";
+import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 async function getFeaturedProducts() {
   try {
@@ -222,8 +221,8 @@ export default async function Home({ searchParams }) {
     {featuredProducts.map((product, index) => {
       const productSlug =
         product?.slug ||
+        makeSlug(product?.name || product?.title || product?.productName) ||
         product?.productSlug ||
-        product?.citySlug ||
         product?.id ||
         `product-${index}`;
 
@@ -251,6 +250,7 @@ export default async function Home({ searchParams }) {
         <Link
           key={product.id || index}
           href={makeLink(`/items/${productSlug}`)}
+          prefetch={true}
           className="group relative overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.06)] transition duration-500 hover:-translate-y-2 hover:shadow-[0_25px_70px_rgba(15,23,42,0.12)]"
         >
           {/* IMAGE */}

@@ -1,9 +1,8 @@
 import ProductDetails from "@/app/items/[slug]/ProductDetails";
-import { fetchProductBySlug } from "@/lib/data-fetcher";
+import { fetchProductBySlug } from "@/lib/data-fetcher-server";
 import Navbar from "@/components/Navbar";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
     const { district, slug } = await params;
@@ -134,7 +133,6 @@ export default async function Page({ params }) {
                 />
             )}
 
-            <Navbar city={city} />
             <ProductDetails
                 slug={slug}
                 product={product}

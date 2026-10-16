@@ -14,22 +14,24 @@ const ProductCard = React.memo(function ProductCard({ product, district }) {
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_180px] gap-5 lg:gap-8 items-center">
         {/* Image */}
         <div className="relative h-[180px] sm:h-[220px] rounded-2xl lg:rounded-3xl overflow-hidden bg-slate-100 flex items-center justify-center">
-          <img
-            src={product.images?.[0] || product.image || "/placeholder.jpg"}
-            alt={product.title || product.name}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-contain p-4"
-            onError={(e) => {
-              e.currentTarget.src = "/placeholder.jpg";
-            }}
-          />
+          <Link href={linkHref} prefetch={true} className="w-full h-full block">
+            <img
+              src={product.images?.[0] || product.image || "/placeholder.jpg"}
+              alt={product.title || product.name}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.jpg";
+              }}
+            />
+          </Link>
         </div>
 
         {/* Content */}
         <div>
           <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
-            <Link href={linkHref} className="hover:text-sky-700 transition">
+            <Link href={linkHref} prefetch={true} className="hover:text-sky-700 transition">
               {product.title || product.name}
             </Link>
           </h3>
@@ -91,6 +93,7 @@ const ProductCard = React.memo(function ProductCard({ product, district }) {
         <div className="flex justify-center lg:justify-end">
           <Link
             href={linkHref}
+            prefetch={true}
             className="w-full sm:w-auto text-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-sky-700 !text-white font-semibold hover:bg-sky-800 shadow-sm hover:shadow transition"
           >
             Get Quote

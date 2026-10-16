@@ -1,8 +1,7 @@
 import ProductDetails from "./ProductDetails";
-import { fetchProductBySlug } from "@/lib/data-fetcher";
+import { fetchProductBySlug } from "@/lib/data-fetcher-server";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;

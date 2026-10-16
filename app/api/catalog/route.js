@@ -2,14 +2,17 @@ import { NextResponse } from "next/server";
 import { fetchAdminCatalog, COMPANY_ID, WEBSITE_ID } from "@/lib/admin-api";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const forceRefresh = searchParams.get("refresh") === "true";
+
     const catalog = await fetchAdminCatalog({
       companyId: COMPANY_ID,
       websiteId: WEBSITE_ID,
-      forceRefresh: true,
+      forceRefresh,
     });
 
     return NextResponse.json(
@@ -19,10 +22,11 @@ export async function GET(req) {
         categoryProducts: catalog.categoryProducts || [],
         normalProducts: catalog.normalProducts || [],
         total: catalog.total || (catalog.products ? catalog.products.length : 0),
+        source: "mongodb_master",
       },
       {
         headers: {
-          "Cache-Control": "no-store, max-age=0, must-revalidate",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );
@@ -40,7 +44,7 @@ export async function GET(req) {
       {
         status: 500,
         headers: {
-          "Cache-Control": "no-store, max-age=0, must-revalidate",
+          "Cache-Control": "no-store",
         },
       }
     );

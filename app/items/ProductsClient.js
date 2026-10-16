@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Toaster } from "react-hot-toast";
@@ -14,11 +16,13 @@ import { fetchFullCatalog } from "@/lib/data-fetcher";
 import "./product.css";
 
 // 1. Memoized Product Link Component
-const ProductLink = memo(function ProductLink({ item, category, scrollToProduct }) {
+const ProductLink = memo(function ProductLink({ item, category, scrollToProduct, isActive }) {
   return (
     <button
       onClick={() => scrollToProduct(item.slug, category)}
-      className="product-link cursor-pointer border-0 bg-transparent text-start w-100"
+      className={`product-link cursor-pointer border-0 bg-transparent text-start w-100 ${
+        isActive ? "active" : ""
+      }`}
     >
       {item.title}
     </button>
@@ -33,6 +37,7 @@ const SubCategoryItem = memo(function SubCategoryItem({
   isSubOpened,
   toggleSubCategory,
   scrollToProduct,
+  activeProductSlug,
 }) {
   return (
     <div className="relative space-y-2 pl-2">
@@ -63,10 +68,11 @@ const SubCategoryItem = memo(function SubCategoryItem({
           <div className="space-y-1.5 pr-1">
             {subList.map((item) => (
               <ProductLink
-                key={item.uid}
+                key={item.uid || item.id || item.slug}
                 item={item}
                 category={category}
                 scrollToProduct={scrollToProduct}
+                isActive={activeProductSlug === item.slug}
               />
             ))}
           </div>
@@ -87,6 +93,7 @@ const CategoryItem = memo(function CategoryItem({
   toggleSubCategory,
   openedSubCategories,
   scrollToProduct,
+  activeProductSlug,
 }) {
   return (
     <div className="category-item relative">
@@ -127,6 +134,7 @@ const CategoryItem = memo(function CategoryItem({
                   isSubOpened={isSubOpened}
                   toggleSubCategory={toggleSubCategory}
                   scrollToProduct={scrollToProduct}
+                  activeProductSlug={activeProductSlug}
                 />
               );
             })}
@@ -147,6 +155,7 @@ export default function ProductsClient({ initialProducts = [], district = null, 
   const [activeCategory, setActiveCategory] = useState("");
   const [openedSubCategories, setOpenedSubCategories] = useState({});
   const [pendingScroll, setPendingScroll] = useState(null);
+  const [activeProductSlug, setActiveProductSlug] = useState("");
   const [showTopButton, setShowTopButton] = useState(false);
   const [activeSubCategory, setActiveSubCategory] = useState("");
   // Keep products state in sync with server-provided initialProducts or client fetch
@@ -265,6 +274,7 @@ export default function ProductsClient({ initialProducts = [], district = null, 
   const scrollToProduct = useCallback((slug, category) => {
     setOpenedCategory(category);
     setActiveCategory(category);
+    setActiveProductSlug(slug);
     setPendingScroll(slug);
 
     // Auto-expand the target subcategory when scrolling to its product
@@ -278,23 +288,28 @@ export default function ProductsClient({ initialProducts = [], district = null, 
     }
   }, [products]);
 
-  // Scroll to selected sidebar item when category expansion finishes
+  // Scroll smoothly to selected product with sticky header offset
   useEffect(() => {
     if (!pendingScroll) return;
 
-    const timer = setTimeout(() => {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
       const el = document.getElementById(pendingScroll);
       if (el) {
-        el.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        clearInterval(interval);
+        const yOffset = -110;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+        setPendingScroll(null);
+      } else if (attempts >= 12) {
+        clearInterval(interval);
+        setPendingScroll(null);
       }
-      setPendingScroll(null);
-    }, 300);
+    }, 40);
 
-    return () => clearTimeout(timer);
-  }, [openedCategory, pendingScroll]);
+    return () => clearInterval(interval);
+  }, [pendingScroll]);
 
   // Scroll back to top visibility
   useEffect(() => {
@@ -356,6 +371,9 @@ export default function ProductsClient({ initialProducts = [], district = null, 
           },
         }}
       />
+
+      {/* NAVBAR */}
+      <Navbar city={city} />
 
       {/* HERO */}
       <section className="product-hero">
@@ -437,6 +455,7 @@ export default function ProductsClient({ initialProducts = [], district = null, 
                             toggleSubCategory={toggleSubCategory}
                             openedSubCategories={openedSubCategories}
                             scrollToProduct={scrollToProduct}
+                            activeProductSlug={activeProductSlug}
                           />
                         );
                       })}
@@ -539,80 +558,99 @@ export default function ProductsClient({ initialProducts = [], district = null, 
 
                               {/* Product List */}
                               <div className="space-y-8">
-                                {list.slice(0, 12).map((product) => (
-                                  <div
-                                    key={product.uid}
-                                    id={product.slug}
-                                    className="product-list-card text-start"
-                                  >
-                                    <div className="product-card-row">
-                                      {/* IMAGE */}
-                                      <div className="product-image-col">
-                                        <div className="list-image">
-                                          <img
-                                            src={product.images?.[0] || product.image || "/placeholder.jpg"}
-                                            alt={product.title}
-                                            onError={(e) => {
-                                              e.currentTarget.src = "/placeholder.jpg";
-                                            }}
-                                          />
+                                {list.map((product) => {
+                                  const isSelected = activeProductSlug === product.slug;
+                                  const targetUrl = district
+                                    ? `/${district}/items/${product.slug}`
+                                    : `/items/${product.slug}`;
+
+                                  return (
+                                    <div
+                                      key={product.uid || product.id || product.slug}
+                                      id={product.slug}
+                                      className={`product-list-card text-start transition-all duration-300 ${
+                                        isSelected ? "product-card-active" : ""
+                                      }`}
+                                    >
+                                      <div className="product-card-row">
+                                        {/* IMAGE */}
+                                        <div className="product-image-col">
+                                          <Link
+                                            href={targetUrl}
+                                            prefetch={true}
+                                            className="list-image block cursor-pointer transition-transform duration-300 hover:scale-105"
+                                          >
+                                            <img
+                                              src={product.images?.[0] || product.image || "/humanlogo.png"}
+                                              alt={product.title}
+                                              onError={(e) => {
+                                                e.currentTarget.src = "/humanlogo.png";
+                                              }}
+                                            />
+                                          </Link>
                                         </div>
-                                      </div>
 
-                                      {/* CONTENT */}
-                                      <div className="product-content-col">
-                                        <div className="list-content">
-                                          <h4 className="fw-bold">{product.title}</h4>
-                                          {/* <p>
-                                            {product.description ||
-                                              product.desc ||
-                                              "Premium laboratory and diagnostic medical equipment."}
-                                          </p> */}
+                                        {/* CONTENT */}
+                                        <div className="product-content-col">
+                                          <div className="list-content">
+                                            <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                                              <Link
+                                                href={targetUrl}
+                                                prefetch={true}
+                                                className="no-underline text-inherit hover:text-blue-600 transition-colors"
+                                              >
+                                                <h4 className="fw-bold m-0 text-slate-900 hover:text-blue-600 transition-colors">
+                                                  {product.title}
+                                                </h4>
+                                              </Link>
+                                              {isSelected && (
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm">
+                                                  Selected Product
+                                                </span>
+                                              )}
+                                            </div>
 
-                                          <div className="spec-grid">
-                                            <div>
-                                              <b>Brand</b>
-                                              <span>{product.brand || "-"}</span>
-                                            </div>
-                                            <div>
-                                              <b>Model</b>
-                                              <span>{product.model || "-"}</span>
-                                            </div>
-                                            {product.instrument && (
+                                            <div className="spec-grid">
                                               <div>
-                                                <b>Instrument</b>
-                                                <span>{product.instrument}</span>
+                                                <b>Brand</b>
+                                                <span>{product.brand || "-"}</span>
                                               </div>
-                                            )}
-                                            {product.usage && (
                                               <div>
-                                                <b>Usage</b>
-                                                <span>{product.usage}</span>
+                                                <b>Model</b>
+                                                <span>{product.model || "-"}</span>
                                               </div>
-                                            )}
+                                              {product.instrument && (
+                                                <div>
+                                                  <b>Instrument</b>
+                                                  <span>{product.instrument}</span>
+                                                </div>
+                                              )}
+                                              {product.usage && (
+                                                <div>
+                                                  <b>Usage</b>
+                                                  <span>{product.usage}</span>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* BUTTON */}
+                                        <div className="product-button-col">
+                                          <div className="product-action">
+                                            <Link
+                                              href={targetUrl}
+                                              prefetch={true}
+                                              className="btn-view cursor-pointer inline-flex items-center justify-center text-center no-underline"
+                                            >
+                                              View Details
+                                            </Link>
                                           </div>
                                         </div>
                                       </div>
-
-                                      {/* BUTTON */}
-                                      <div className="product-button-col">
-                                        <div className="product-action">
-                                          <button
-                                            className="btn-view cursor-pointer"
-                                            onClick={() => {
-                                              const targetUrl = district
-                                                ? `/${district}/items/${product.slug}`
-                                                : `/items/${product.slug}`;
-                                              router.push(targetUrl);
-                                            }}
-                                          >
-                                            View Details
-                                          </button>
-                                        </div>
-                                      </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                           ))

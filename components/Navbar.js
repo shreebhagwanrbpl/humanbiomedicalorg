@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function Navbar({ city = "" }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -8,21 +10,15 @@ export default function Navbar({ city = "" }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 15);
     };
 
-    window.addEventListener("scroll", handleScroll);
-
-    return () =>
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow =
-      menuOpen ? "hidden" : "auto";
+    document.body.style.overflow = menuOpen ? "hidden" : "auto";
   }, [menuOpen]);
 
   const makeLink = (path = "") => {
@@ -40,192 +36,207 @@ export default function Navbar({ city = "" }) {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled
-            ? "bg-white/80 backdrop-blur-2xl border-b border-blue-100 shadow-lg"
-            : "bg-transparent"
-          }`}
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/95 backdrop-blur-xl border-b border-blue-100 shadow-md py-2.5"
+            : "bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-3.5"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="h-20 flex items-center justify-between">
+          <div className="flex items-center justify-between">
             {/* LOGO */}
-            <a
+            <Link
               href={makeLink("")}
-              className="flex items-center gap-3"
+              className="flex items-center gap-3 group"
+              aria-label="Human Biomedical Homepage"
             >
-              <img
-                src="/humanlogo.png"
-                alt="Human Biomedical"
-                className="w-12 h-12 object-contain"
-              />
-            </a>
+              <div className="relative w-11 h-11 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-tr from-blue-50 to-blue-100/50 p-1 border border-blue-100">
+                <Image
+                  src="/humanlogo.png"
+                  alt="Human Biomedical Logo"
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                  priority
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+                  Human <span className="text-blue-600">Biomedical</span>
+                </span>
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                  {city && city.toLowerCase() !== "india" ? `Equipment & Lab Supplies • ${city}` : "Diagnostic & Medical Equipment"}
+                </span>
+              </div>
+            </Link>
 
             {/* DESKTOP MENU */}
-            <div className="hidden lg:flex items-center gap-10">
-              <a
+            <nav className="hidden lg:flex items-center gap-8 text-[15px] font-semibold text-slate-700">
+              <Link
                 href={makeLink("")}
-                className="text-gray-700 font-medium hover:text-blue-600 transition"
+                className="hover:text-blue-600 transition-colors py-1"
               >
                 Home
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href={makeLink("/about")}
-                className="text-gray-700 font-medium hover:text-blue-600 transition"
+                className="hover:text-blue-600 transition-colors py-1"
               >
                 About
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href={makeLink("/items")}
-                className="text-gray-700 font-medium hover:text-blue-600 transition"
+                className="hover:text-blue-600 transition-colors py-1"
               >
                 Products
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href={makeLink("/services")}
-                className="text-gray-700 font-medium hover:text-blue-600 transition"
+                className="hover:text-blue-600 transition-colors py-1"
               >
                 Services
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href={makeLink("/contact")}
-                className="text-gray-700 font-medium hover:text-blue-600 transition"
+                className="hover:text-blue-600 transition-colors py-1"
               >
                 Contact
-              </a>
-            </div>
+              </Link>
+            </nav>
 
-            {/* RIGHT SIDE */}
-            <div className="flex items-center gap-4">
-              <a
+            {/* RIGHT SIDE CTA */}
+            <div className="flex items-center gap-3">
+              <Link
                 href={makeLink("/contact")}
-                className="hidden lg:flex h-12 px-7 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold items-center justify-center shadow-xl hover:scale-105 transition duration-300"
+                className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-sm shadow-md hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
               >
                 Get Quote
-              </a>
+              </Link>
 
               <button
-                onClick={() =>
-                  setMenuOpen(!menuOpen)
-                }
-                className="lg:hidden relative w-12 h-12 rounded-2xl bg-white border border-blue-100 shadow-lg flex items-center justify-center"
+                type="button"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="lg:hidden relative w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center focus:outline-none"
+                aria-label="Toggle navigation menu"
               >
-                <div className="relative w-6 h-6">
+                <div className="relative w-5 h-4 flex flex-col justify-between">
                   <span
-                    className={`absolute left-0 top-1 w-6 h-0.5 bg-gray-900 transition-all duration-300 ${menuOpen
-                        ? "rotate-45 top-3"
-                        : ""
-                      }`}
+                    className={`block h-0.5 w-full bg-slate-800 rounded-full transition-all duration-300 ${
+                      menuOpen ? "rotate-45 translate-y-1.5" : ""
+                    }`}
                   ></span>
-
                   <span
-                    className={`absolute left-0 top-3 w-6 h-0.5 bg-gray-900 transition-all duration-300 ${menuOpen
-                        ? "opacity-0"
-                        : ""
-                      }`}
+                    className={`block h-0.5 w-full bg-slate-800 rounded-full transition-all duration-300 ${
+                      menuOpen ? "opacity-0" : ""
+                    }`}
                   ></span>
-
                   <span
-                    className={`absolute left-0 top-5 w-6 h-0.5 bg-gray-900 transition-all duration-300 ${menuOpen
-                        ? "-rotate-45 top-3"
-                        : ""
-                      }`}
+                    className={`block h-0.5 w-full bg-slate-800 rounded-full transition-all duration-300 ${
+                      menuOpen ? "-rotate-45 -translate-y-1.5" : ""
+                    }`}
                   ></span>
                 </div>
               </button>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
       {/* MOBILE OVERLAY */}
       <div
-        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300 lg:hidden ${menuOpen
-            ? "opacity-100 visible"
-            : "opacity-0 invisible"
-          }`}
-        onClick={() =>
-          setMenuOpen(false)
-        }
+        className={`fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          menuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+        }`}
+        onClick={() => setMenuOpen(false)}
       ></div>
 
-      {/* MOBILE MENU */}
+      {/* MOBILE MENU DRAWER */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-[320px] bg-white shadow-[0_20px_100px_rgba(0,0,0,0.2)] transition-all duration-500 lg:hidden ${menuOpen
-            ? "translate-x-0"
-            : "translate-x-full"
-          }`}
+        className={`fixed top-0 right-0 z-50 h-full w-[290px] sm:w-[320px] bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        <div className="p-6 border-b border-blue-100 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-black text-gray-900">
-              Menu
-            </h2>
-
-            <p className="text-sm text-blue-600 font-medium mt-1">
-              Human Biomedical
-            </p>
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/humanlogo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="object-contain"
+            />
+            <span className="font-bold text-slate-900">Human Biomedical</span>
           </div>
 
           <button
-            onClick={() =>
-              setMenuOpen(false)
-            }
-            className="w-12 h-12 rounded-2xl bg-blue-50 text-2xl text-blue-700"
+            onClick={() => setMenuOpen(false)}
+            className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg font-bold"
+            aria-label="Close menu"
           >
-            ×
+            ✕
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-3">
-          <a
+        <div className="p-5 flex flex-col gap-2 overflow-y-auto flex-1 text-slate-800 font-semibold">
+          <Link
             href={makeLink("")}
-            className="h-14 px-5 rounded-2xl hover:bg-blue-50 flex items-center text-gray-800 font-semibold transition"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition"
           >
             Home
-          </a>
+          </Link>
 
-          <a
+          <Link
             href={makeLink("/about")}
-            className="h-14 px-5 rounded-2xl hover:bg-blue-50 flex items-center text-gray-800 font-semibold transition"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition"
           >
-            About
-          </a>
+            About Us
+          </Link>
 
-          <a
+          <Link
             href={makeLink("/items")}
-            className="h-14 px-5 rounded-2xl hover:bg-blue-50 flex items-center text-gray-800 font-semibold transition"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition"
           >
-            Products
-          </a>
+            Products Catalog
+          </Link>
 
-          <a
+          <Link
             href={makeLink("/services")}
-            className="h-14 px-5 rounded-2xl hover:bg-blue-50 flex items-center text-gray-800 font-semibold transition"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition"
           >
-            Services
-          </a>
+            Services & AMC
+          </Link>
 
-          <a
+          <Link
             href={makeLink("/contact")}
-            className="h-14 px-5 rounded-2xl hover:bg-blue-50 flex items-center text-gray-800 font-semibold transition"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition"
           >
-            Contact
-          </a>
+            Contact Us
+          </Link>
 
-          <a
-            href={makeLink("/contact")}
-            className="mt-6 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold flex items-center justify-center shadow-xl"
-          >
-            Get Free Quote
-          </a>
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <Link
+              href={makeLink("/contact")}
+              onClick={() => setMenuOpen(false)}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold flex items-center justify-center shadow-md active:scale-95 transition"
+            >
+              Get Free Quotation
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="h-20"></div>
+      {/* Spacer to push content below fixed navbar */}
+      <div className="h-16 sm:h-20" aria-hidden="true"></div>
     </>
   );
 }

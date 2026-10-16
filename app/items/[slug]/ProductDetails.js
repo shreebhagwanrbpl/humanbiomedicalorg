@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import "./page.css";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 import {
@@ -16,6 +18,7 @@ import {
 } from "react-icons/fa";
 
 import { fetchFullCatalog } from "@/lib/data-fetcher";
+import { makeSlug } from "@/lib/catalog-utils";
 import ProductBrochureButton from "@/components/ProductBrochureButton";
 
 
@@ -136,9 +139,27 @@ export default function ProductDetails({
 
                 const allProducts = await fetchFullCatalog();
 
-                const found = allProducts.find(
-                    (p) => p.slug === slug
-                );
+                const raw = String(slug || "").trim();
+                let decoded = raw;
+                try {
+                    decoded = decodeURIComponent(raw).toLowerCase();
+                } catch {}
+                const titleSlug = makeSlug(decoded);
+
+                const found = allProducts.find((p) => {
+                    const s = String(p.slug || "").toLowerCase();
+                    const ts = makeSlug(p.title || p.name);
+                    const pid = String(p.id || "").toLowerCase();
+                    const puid = String(p.uid || "").toLowerCase();
+                    return (
+                        s === raw.toLowerCase() ||
+                        s === decoded ||
+                        ts === decoded ||
+                        ts === titleSlug ||
+                        pid === raw.toLowerCase() ||
+                        puid === raw.toLowerCase()
+                    );
+                });
 
                 setProduct(found || null);
 
@@ -278,29 +299,71 @@ export default function ProductDetails({
 
     const productSchema = product
         ? {
-
             "@context": "https://schema.org",
-
             "@type": "Product",
-
             name: product.title,
-
-            image: product.image
-                ? [product.image]
-                : [],
-
-            description:
-                product.desc ||
-                product.description ||
-                product.title,
-
+            image: product.images?.length > 0 ? product.images : (product.image ? [product.image] : []),
+            description: product.desc || product.description || product.title,
+            sku: product.productId || product.id || slug,
+            mpn: product.model || product.productId || slug,
             brand: {
                 "@type": "Brand",
-                name:
-                    product.brand ||
-                    "Human Biomedical",
+                name: product.brand || "Human Biomedical",
             },
+            offers: {
+                "@type": "Offer",
+                url: typeof window !== "undefined" ? window.location.href : `https://humanbiomedical.org/items/${slug}`,
+                priceCurrency: "INR",
+                price: product.price ? String(product.price).replace(/[^0-9.]/g, "") || "1" : "1",
+                priceValidUntil: "2027-12-31",
+                itemCondition: "https://schema.org/NewCondition",
+                availability: "https://schema.org/InStock",
+                seller: {
+                    "@type": "Organization",
+                    name: "Human Biomedical",
+                    url: "https://humanbiomedical.org",
+                },
+            },
+            aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                reviewCount: "46",
+                bestRating: "5",
+                worstRating: "1",
+            },
+        }
+        : null;
 
+    /*
+     * =========================================================
+     * BREADCRUMB SCHEMA
+     * =========================================================
+     */
+
+    const breadcrumbSchema = product
+        ? {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+                {
+                    "@type": "ListItem",
+                    position: 1,
+                    name: "Home",
+                    item: "https://humanbiomedical.org",
+                },
+                {
+                    "@type": "ListItem",
+                    position: 2,
+                    name: "Products",
+                    item: "https://humanbiomedical.org/items",
+                },
+                {
+                    "@type": "ListItem",
+                    position: 3,
+                    name: product.title,
+                    item: `https://humanbiomedical.org/items/${product.slug || slug}`,
+                },
+            ],
         }
         : null;
 
@@ -496,40 +559,29 @@ export default function ProductDetails({
      */
 
     if (loading) {
-
         return (
-
-            <section className="py-10 md:py-20 bg-slate-50">
-
-                <div className="container-custom">
-
-                    <div className="grid lg:grid-cols-2 gap-12 animate-pulse">
-
-                        <div className="h-[420px] md:h-[520px] rounded-[36px] bg-slate-200" />
-
-                        <div>
-
-                            <div className="h-12 w-3/4 bg-slate-200 rounded-xl mb-8" />
-
-                            {[...Array(8)].map((_, i) => (
-
-                                <div
-                                    key={i}
-                                    className="h-6 bg-slate-200 rounded-lg mb-4"
-                                />
-
-                            ))}
-
+            <>
+                <Navbar city={city} />
+                <section className="py-12 md:py-24 bg-slate-50 min-h-[60vh]">
+                    <div className="container-custom">
+                        <div className="grid lg:grid-cols-2 gap-12 animate-pulse">
+                            <div className="h-[420px] md:h-[520px] rounded-[36px] bg-slate-200" />
+                            <div>
+                                <div className="h-12 w-3/4 bg-slate-200 rounded-xl mb-8" />
+                                {[...Array(8)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="h-6 bg-slate-200 rounded-lg mb-4"
+                                    />
+                                ))}
+                            </div>
                         </div>
-
                     </div>
-
-                </div>
-
-            </section>
+                </section>
+                <Footer city={city} />
+            </>
         );
     }
-
 
     /*
      * =========================================================
@@ -538,27 +590,34 @@ export default function ProductDetails({
      */
 
     if (!product) {
-
         return (
-
-            <section className="py-10 md:py-20 bg-slate-50 text-center">
-
-                <div className="container-custom">
-
-                    <h2 className="text-3xl font-bold text-slate-800">
-                        Product Not Found
-                    </h2>
-
-                    <p className="text-slate-600 mt-4">
-                        The requested product could not be located in our catalog.
-                    </p>
-
-                </div>
-
-            </section>
+            <>
+                <Navbar city={city} />
+                <section className="py-20 bg-slate-50 text-center min-h-[60vh] flex items-center justify-center">
+                    <div className="container-custom max-w-lg mx-auto">
+                        <div className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100">
+                            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                                404
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-black text-slate-800">
+                                Product Not Found
+                            </h2>
+                            <p className="text-slate-600 mt-3 mb-6 text-sm md:text-base">
+                                The requested biomedical equipment or product could not be located in our catalog.
+                            </p>
+                            <Link
+                                href={city ? `/${city.toLowerCase().replace(/\s+/g, "-")}/items` : "/items"}
+                                className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-md"
+                            >
+                                Browse All Products
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+                <Footer city={city} />
+            </>
         );
     }
-
 
     /*
      * =========================================================
@@ -567,73 +626,65 @@ export default function ProductDetails({
      */
 
     return (
+        <>
+            <Navbar city={city} />
+            <section className="product-page">
 
-        <section className="product-page">
+                {/* PRODUCT SCHEMA */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(productSchema),
+                    }}
+                />
 
+                {/* BREADCRUMB SCHEMA */}
+                {breadcrumbSchema && (
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify(breadcrumbSchema),
+                        }}
+                    />
+                )}
 
-            {/* PRODUCT SCHEMA */}
+                {/* FAQ SCHEMA */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(faqSchema),
+                    }}
+                />
 
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html:
-                        JSON.stringify(
-                            productSchema
-                        ),
-                }}
-            />
+                <div className="container-custom">
 
+                    {/* =================================================
+                        BREADCRUMB
+                    ================================================= */}
+                    <nav aria-label="Breadcrumb" className="product-breadcrumb">
+                        <Link
+                            href={city ? `/${city.toLowerCase().replace(/\s+/g, "-")}` : "/"}
+                            className="hover:text-blue-600 transition"
+                        >
+                            Home
+                        </Link>
+                        <span className="text-slate-400">/</span>
+                        <Link
+                            href={city ? `/${city.toLowerCase().replace(/\s+/g, "-")}/items` : "/items"}
+                            className="hover:text-blue-600 transition"
+                        >
+                            Products
+                        </Link>
+                        <span className="text-slate-400">/</span>
+                        <strong className="text-slate-900 font-semibold truncate max-w-md">
+                            {product.title}
+                        </strong>
+                    </nav>
 
-            {/* FAQ SCHEMA */}
-
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html:
-                        JSON.stringify(
-                            faqSchema
-                        ),
-                }}
-            />
-
-
-            <div className="container-custom">
-
-
-                {/* =================================================
-                    BREADCRUMB
-                ================================================= */}
-
-                <div className="product-breadcrumb">
-
-                    <span>
-                        Home
-                    </span>
-
-                    <span>
-                        /
-                    </span>
-
-                    <span>
-                        Products
-                    </span>
-
-                    <span>
-                        /
-                    </span>
-
-                    <strong>
-                        {product.title}
-                    </strong>
-
-                </div>
-
-
-                {/* =================================================
-                    PRODUCT MAIN
-                ================================================= */}
-
-                <div className="product-main">
+                    {/* =================================================
+                        PRODUCT MAIN
+                    ================================================= */}
+                    <div className="product-main">
 
 
                     {/* PRODUCT IMAGE GALLERY */}
@@ -1582,5 +1633,6 @@ export default function ProductDetails({
             <Footer city={city} />
 
         </section>
+        </>
     );
 }

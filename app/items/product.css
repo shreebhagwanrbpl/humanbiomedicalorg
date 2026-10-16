@@ -304,6 +304,13 @@ LEFT SIDEBAR
   color: #1D4ED8;
 }
 
+.product-link.active {
+  background: #eff6ff !important;
+  border-left-color: #2563eb !important;
+  color: #1d4ed8 !important;
+  font-weight: 700 !important;
+}
+
 /*======================================
 RIGHT SECTION
 ======================================*/
@@ -403,19 +410,27 @@ PRODUCT CARD
 ======================================*/
 
 .product-list-card {
+  scroll-margin-top: 130px;
   background: #fff;
   border-radius: 16px;
   border: 1px solid #ececec;
   padding: 22px;
   margin-bottom: 22px;
-  transition: .35s;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
 }
 
 .product-list-card:hover {
-  transform: translateY(-5px);
-  border-color: #0d0d0d;
+  transform: translateY(-4px);
+  border-color: #94a3b8;
   box-shadow: 0 18px 40px rgba(0, 0, 0, .08);
+}
+
+.product-list-card.product-card-active {
+  border-color: #2563eb !important;
+  background: #f8faff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25), 0 20px 45px rgba(37, 99, 235, 0.12) !important;
+  transform: translateY(-4px);
 }
 
 /*======================================
